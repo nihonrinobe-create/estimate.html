@@ -294,13 +294,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <!-- ===== 完工セクション ===== -->
     <div id="section_kankou">
 
-      <!-- 今日の作業 -->
-      <div class="section-title">💰 今日の費用</div>
-      <div class="card">
-        <!-- ★修理案件の場合は display:none で非表示にする -->
-        <div id="diag_fee_row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee">
-          <span id="diag_fee_label" style="font-weight:600">故障診断費</span>
-          <span style="font-weight:700;color:var(--blue)" id="diag_fee_display">¥9,900</span>
+      <!-- 今日の作業（診断費：修理案件では非表示） -->
+      <div id="diag_fee_section">
+        <div class="section-title">💰 今日の費用</div>
+        <div class="card">
+          <div id="diag_fee_row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+            <span id="diag_fee_label" style="font-weight:600">故障診断費</span>
+            <span style="font-weight:700;color:var(--blue)" id="diag_fee_display">¥9,900</span>
+          </div>
         </div>
       </div>
 
@@ -472,11 +473,9 @@ const P = {
 function applyRepairMode() {
   if (!P.is_repair || !P.order_items || P.order_items.length === 0) return;
 
-  // 故障診断費の行を「修理費」として表示し、金額は0円（修理項目の合計が全額）
-  document.getElementById('diag_fee_label').textContent = '修理費（下記作業合計）';
-  document.getElementById('diag_fee_display').textContent = '¥0';
-  // 診断費行を非表示（修理メニューに全額入るので重複しないよう）
-  document.getElementById('diag_fee_row').style.display = 'none';
+  // 「💰 今日の費用」カードごと非表示（修理案件は診断費なし）
+  const diagSection = document.getElementById('diag_fee_section');
+  if (diagSection) diagSection.style.display = 'none';
 
   // 修理メニューに order_items の数量をセット
   P.order_items.forEach(function(item) {
@@ -547,7 +546,8 @@ function buildCaseId() {
   const num    = document.getElementById('case_number').value.trim();
   if (!num) return '';
   if (prefix === 'YA') {
-    return alpha ? 'YA' + alpha + '-' + num : 'YA-' + num;
+    // 正: YA-C12345678 （ハイフンはYAの直後、アルファベットと番号はくっつける）
+    return alpha ? 'YA-' + alpha + num : 'YA-' + num;
   }
   return prefix + '-' + num;
 }
