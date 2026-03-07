@@ -35,9 +35,16 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
 .field.error .error-msg { display:block; }
 
 .system-fields { background:#f0f4f8; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #dce1e8; }
-.case-id-group { display:flex; gap:8px; }
-.case-id-group select { width:35%; background:#fff; }
-.case-id-group input { width:65%; }
+
+/* ★ 案件番号UI */
+.case-id-builder { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.case-id-builder select { padding:10px 8px; border:2px solid var(--border); border-radius:8px; font-size:1rem; font-weight:700; color:var(--blue); background:#fff; }
+#c_case_prefix { min-width:80px; }
+#c_case_alpha { min-width:64px; background:#e8f2fc !important; border-color:var(--blue) !important; }
+.case-id-sep { font-size:1.1rem; font-weight:700; color:#999; }
+#c_case_num { flex:1; min-width:130px; padding:10px; border:2px solid var(--border); border-radius:8px; font-size:1rem; }
+.case-id-preview { margin-top:6px; font-size:.8rem; color:var(--text-sub); }
+.case-id-preview span { font-weight:700; color:var(--blue); }
 
 .symptom-grid, .order-type-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .payment-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -115,17 +122,39 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
     <div class="card">
       <div class="card-title">📋 管理情報</div>
       <div class="system-fields">
+
+        <!-- ★ 案件番号UI（estimate.htmlと統一） -->
         <div class="field">
           <label>案件番号 <span style="color:red;font-size:.8rem">※必須</span></label>
-          <div class="case-id-group">
-            <select id="c_case_prefix">
+          <div class="case-id-builder">
+            <select id="c_case_prefix" onchange="onIndexPrefixChange()">
               <option value="YA">YA</option>
               <option value="HM">HM</option>
               <option value="CP">CP</option>
+              <option value="EC">EC</option>
+              <option value="HC">HC</option>
             </select>
-            <input type="text" id="c_case_num" placeholder="例: 20260212-001">
+            <!-- YA専用：A〜Z -->
+            <select id="c_case_alpha" onchange="updateIndexCaseIdPreview()">
+              <option value="">-</option>
+              <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+              <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+              <option value="G">G</option><option value="H">H</option><option value="I">I</option>
+              <option value="J">J</option><option value="K">K</option><option value="L">L</option>
+              <option value="M">M</option><option value="N">N</option><option value="O">O</option>
+              <option value="P">P</option><option value="Q">Q</option><option value="R">R</option>
+              <option value="S">S</option><option value="T">T</option><option value="U">U</option>
+              <option value="V">V</option><option value="W">W</option><option value="X">X</option>
+              <option value="Y">Y</option><option value="Z">Z</option>
+            </select>
+            <span class="case-id-sep">-</span>
+            <input type="text" id="c_case_num" placeholder="例: 20260212001" inputmode="numeric" oninput="updateIndexCaseIdPreview()">
+          </div>
+          <div class="case-id-preview">
+            案件番号: <span id="c_case_id_preview">---</span>
           </div>
         </div>
+
         <div class="field">
           <label>担当者番号 <span style="color:red;font-size:.8rem">※必須</span></label>
           <input type="text" id="c_emp_id" inputmode="numeric" placeholder="例: 0001">
@@ -350,13 +379,11 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
 
       <div class="agreement-box">
         <div class="checkbox-group">
-          <!-- ① 契約同意 -->
           <label>
             <input type="checkbox" id="agree_contract">
             <span>上記金額およびキャンセル規定に同意して申し込みます。</span>
           </label>
 
-          <!-- ② 電子交付の承諾（テキスト入力） -->
           <div class="consent-input-box">
             <label><b>【電子交付への承諾】</b></label>
             <p style="font-size:.85rem;color:#333;margin-bottom:8px">
@@ -370,7 +397,6 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
             <input type="text" id="consent_text" placeholder="ここに貼り付け" style="font-size:1rem;width:100%">
           </div>
 
-          <!-- ③ プライバシーポリシー -->
           <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;font-size:.9rem;padding:10px;border:1px solid var(--border);border-radius:8px;background:#fff">
             <input type="checkbox" id="agree_privacy" style="margin-top:4px;transform:scale(1.2);flex-shrink:0;cursor:pointer">
             <span><a href="./privacy.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--blue);text-decoration:underline;font-weight:700">プライバシーポリシー</a>に同意します（業務委託先への共有を含む）。</span>
@@ -415,6 +441,42 @@ let currentStep = 1;
 let couponApplied = false;
 const CONSENT_PHRASE = '契約書面等をPDFメールで受領することに同意します';
 
+// ================================
+// ★ 案件番号UI（estimate.htmlと統一）
+// ================================
+function onIndexPrefixChange() {
+  const prefix = document.getElementById('c_case_prefix').value;
+  const alphaEl = document.getElementById('c_case_alpha');
+  // YA以外はアルファベット選択を非表示
+  alphaEl.style.display = (prefix === 'YA') ? '' : 'none';
+  if (prefix !== 'YA') alphaEl.value = '';
+  updateIndexCaseIdPreview();
+}
+
+function buildIndexCaseId() {
+  const prefix = document.getElementById('c_case_prefix').value;
+  const alpha  = document.getElementById('c_case_alpha').value;
+  const num    = document.getElementById('c_case_num').value.trim();
+  if (!num) return '';
+  if (prefix === 'YA') {
+    // YA-C12345678 形式
+    return alpha ? 'YA-' + alpha + num : 'YA-' + num;
+  }
+  return prefix + '-' + num;
+}
+
+function updateIndexCaseIdPreview() {
+  const id = buildIndexCaseId();
+  document.getElementById('c_case_id_preview').textContent = id || '---';
+}
+
+// ページ読み込み時に初期化
+setTimeout(function() {
+  onIndexPrefixChange(); // YAがデフォルト → アルファベット表示
+}, 50);
+
+// ================================
+
 function copyConsent() {
   const btn = document.getElementById('btn_copy_consent');
   if (navigator.clipboard) {
@@ -439,7 +501,6 @@ window.onload = async function() {
   const p = new URLSearchParams(location.search);
   const shortId = p.get('c');
 
-  // 短縮URL: ?c=CASE_ID → GASからデータ取得
   if (shortId && !p.get('name')) {
     try {
       const resp = await fetch(GAS_API_URL, {
@@ -460,7 +521,6 @@ window.onload = async function() {
       }
     } catch(e) { console.log('lookup error', e); }
   } else {
-    // 通常URL: フルパラメータ
     if (p.get('case_id')) fillCaseId(p.get('case_id'));
     if (shortId) fillCaseId(shortId);
     if (p.get('emp_id'))   document.getElementById('c_emp_id').value = p.get('emp_id');
@@ -476,14 +536,43 @@ window.onload = async function() {
   toggleWorkMenus();
 };
 
+// ★ fillCaseId：新フォーマット対応（YA-C12345678 / HM-12345678 など）
 function fillCaseId(caseId) {
   if (!caseId) return;
-  const parts = caseId.split('-');
-  if (parts.length > 1 && ['YA','HM','CP'].includes(parts[0])) {
-    document.getElementById('c_case_prefix').value = parts[0];
-    document.getElementById('c_case_num').value = parts.slice(1).join('-');
+  const PREFIXES = ['YA', 'HM', 'CP', 'EC', 'HC'];
+
+  // プレフィックスを特定
+  let matchedPrefix = '';
+  for (const pfx of PREFIXES) {
+    if (caseId.startsWith(pfx + '-')) {
+      matchedPrefix = pfx;
+      break;
+    }
+  }
+
+  if (matchedPrefix) {
+    document.getElementById('c_case_prefix').value = matchedPrefix;
+    const rest = caseId.slice(matchedPrefix.length + 1); // ハイフンの後
+
+    if (matchedPrefix === 'YA') {
+      // YA-C12345678 → alpha='C', num='12345678'
+      // YA-12345678  → alpha='',  num='12345678'
+      const firstChar = rest.charAt(0);
+      if (/^[A-Z]$/.test(firstChar)) {
+        document.getElementById('c_case_alpha').value = firstChar;
+        document.getElementById('c_case_num').value = rest.slice(1);
+      } else {
+        document.getElementById('c_case_alpha').value = '';
+        document.getElementById('c_case_num').value = rest;
+      }
+    } else {
+      document.getElementById('c_case_num').value = rest;
+    }
+    onIndexPrefixChange();
   } else {
+    // プレフィックス不明の場合はそのまま番号欄へ
     document.getElementById('c_case_num').value = caseId;
+    updateIndexCaseIdPreview();
   }
 }
 
@@ -595,6 +684,12 @@ function validateStep(step) {
     if (!document.getElementById('c_zip').value.trim()) { setFieldError('f_zip','郵便番号を入力してください'); ok=false; }
     if (!document.getElementById('c_address').value.trim()) { setFieldError('f_address','住所を入力してください'); ok=false; }
     if (!document.getElementById('c_banchi').value.trim()) { setFieldError('f_banchi','番地を入力してください'); ok=false; }
+    // ★ 案件番号バリデーション
+    if (!buildIndexCaseId()) {
+      alert('案件番号の番号部分を入力してください');
+      document.getElementById('c_case_num').focus();
+      ok = false;
+    }
   }
   if (step === 2) {
     ['f_equipment','f_symptom'].forEach(clearFieldError);
@@ -635,7 +730,6 @@ function getSymptoms() { return Array.from(document.querySelectorAll('input[name
 function getOrderType() { return document.querySelector('input[name="order_type"]:checked').value; }
 function getPaymentMethod() { return document.querySelector('input[name="payment_method"]:checked').value; }
 
-// 振込期限フィールドの表示切替
 document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
   radio.addEventListener('change', () => {
     const area = document.getElementById('transfer_deadline_area');
@@ -650,13 +744,12 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
     }
   });
 });
+
 function getInvOptions() {
   const items = [];
   document.querySelectorAll('.inv-item-row').forEach(row => {
     const price = parseInt(row.querySelector('.inv-price').value) || 0;
-    if (price > 0) {
-      items.push({ name: row.dataset.invName, price: price });
-    }
+    if (price > 0) items.push({ name: row.dataset.invName, price: price });
   });
   return items;
 }
@@ -680,10 +773,8 @@ function calculateRepairTotal() {
 }
 
 function getFormData() {
-  const prefix = document.getElementById('c_case_prefix').value;
-  const num = document.getElementById('c_case_num').value;
   return {
-    case_id: num ? prefix + '-' + num : '',
+    case_id:   buildIndexCaseId(),   // ★ 新しい組み立て関数を使用
     emp_id:    (function(){ var s=document.getElementById('c_emp_id').value.trim(); while(s.length>0&&s.length<4)s='0'+s; return s; })(),
     name:      document.getElementById('c_name').value,
     kana:      document.getElementById('c_kana').value,
@@ -704,7 +795,6 @@ function getFormData() {
 function nextStep() {
   if (!validateStep(currentStep)) return;
 
-  // Step3 → Step4（確認画面生成）
   if (currentStep === 3) {
     const d = getFormData();
     const sym = d.symptoms.length ? d.symptoms.join('、') : '（選択なし）';
@@ -736,7 +826,6 @@ function nextStep() {
       '</span></div>';
   }
 
-  // Step4 → Step5（見積書生成）
   if (currentStep === 4) {
     const orderType = getOrderType();
     const equip = document.getElementById('c_equipment').value;
@@ -752,7 +841,6 @@ function nextStep() {
         + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagFee.toLocaleString() + '円</td>'
         + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
         + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagFee.toLocaleString() + '円</td></tr>';
-      // 原因究明追加オプション（金額あれば合計に加算）
       const inv = getInvOptions();
       inv.forEach(v => {
         if (v.price > 0) {
@@ -782,7 +870,6 @@ function nextStep() {
       });
     }
 
-    // カスタム項目
     getCustomItems().forEach(c => {
       totalAmount += c.subtotal;
       estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + c.name + '</td>'
@@ -807,7 +894,6 @@ function nextStep() {
     document.getElementById('fee_diagnosis').value = totalAmount.toLocaleString('ja-JP') + '円';
   }
 
-  // Step6 → 送信
   if (currentStep === 6) { doSubmit(); return; }
 
   currentStep++;
@@ -837,7 +923,6 @@ async function doSubmit() {
 
   const customItems = getCustomItems();
 
-  // 内訳items配列を構築（契約書PDF用）
   const orderItems = [];
   const ot = getOrderType();
   const equip = document.getElementById('c_equipment').value;
@@ -883,7 +968,6 @@ async function doSubmit() {
   currentStep = 7;
   updateUI();
 
-  // 業務報告リンク生成（短縮URL）
   const estUrl = 'https://nihonrinobe-create.github.io/estimate.html?c=' + encodeURIComponent(d.case_id);
   document.getElementById('report_link').href = estUrl;
   document.getElementById('report_link_area').style.display = 'block';
