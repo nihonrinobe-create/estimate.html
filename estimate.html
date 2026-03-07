@@ -120,9 +120,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           <!-- プレフィックス選択 -->
           <select id="case_prefix" onchange="onPrefixChange()" style="padding:10px 8px;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-weight:700;color:var(--blue);background:#fff;min-width:80px">
             <option value="YA">YA</option>
-            <option value="HM">HM</option>
             <option value="CP">CP</option>
             <option value="HC">HC</option>
+            <option value="HM">HM</option>
             <option value="EC">EC</option>
           </select>
           <!-- YA専用：A〜Zアルファベット選択 -->
@@ -294,7 +294,24 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <!-- ===== 完工セクション ===== -->
     <div id="section_kankou">
 
-      <!-- 今日の作業（診断費：修理案件では非表示） -->
+      <!-- ★ 手入力モード専用：作業種別トグル（パラメータなし＋完工時のみ表示） -->
+      <div id="work_type_toggle" style="display:none">
+        <div class="section-title">🔨 作業種別</div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <label class="status-label">
+              <input type="radio" name="manual_work_type" value="診断" checked onchange="onWorkTypeChange()">
+              <span class="icon">🔍</span>故障診断
+            </label>
+            <label class="status-label">
+              <input type="radio" name="manual_work_type" value="修理" onchange="onWorkTypeChange()">
+              <span class="icon">🔧</span>修理
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💰 今日の費用（修理案件時は「修理費＋合計額」を動的表示） -->
       <div id="diag_fee_section">
         <div class="section-title">💰 今日の費用</div>
         <div class="card">
@@ -305,9 +322,53 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         </div>
       </div>
 
+      <!-- 追加条件（高所危険作業など） -->
+      <div class="section-title">📋 追加条件</div>
+      <div class="card">
+        <div style="font-size:.82rem;color:var(--text-sub);margin-bottom:10px">該当する項目に金額を入力してください</div>
+        <div id="inv_options_area">
+          <div class="inv-est-row" data-inv-name="高所危険作業" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+            <span style="font-size:.9rem;font-weight:600;flex:1">高所危険作業</span>
+            <input type="number" class="inv-est-price" placeholder="金額（税込）" inputmode="numeric"
+              style="width:130px;padding:8px;border:2px solid var(--border);border-radius:8px;font-size:.95rem;text-align:right"
+              oninput="recalc()">
+          </div>
+          <div class="inv-est-row" data-inv-name="業務用点検" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+            <span style="font-size:.9rem;font-weight:600;flex:1">業務用点検</span>
+            <input type="number" class="inv-est-price" placeholder="金額（税込）" inputmode="numeric"
+              style="width:130px;padding:8px;border:2px solid var(--border);border-radius:8px;font-size:.95rem;text-align:right"
+              oninput="recalc()">
+          </div>
+          <div class="inv-est-row" data-inv-name="室外機特殊設置" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+            <span style="font-size:.9rem;font-weight:600;flex:1">室外機特殊設置</span>
+            <input type="number" class="inv-est-price" placeholder="金額（税込）" inputmode="numeric"
+              style="width:130px;padding:8px;border:2px solid var(--border);border-radius:8px;font-size:.95rem;text-align:right"
+              oninput="recalc()">
+          </div>
+          <div class="inv-est-row" data-inv-name="電気系統調査" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+            <span style="font-size:.9rem;font-weight:600;flex:1">電気系統調査</span>
+            <input type="number" class="inv-est-price" placeholder="金額（税込）" inputmode="numeric"
+              style="width:130px;padding:8px;border:2px solid var(--border);border-radius:8px;font-size:.95rem;text-align:right"
+              oninput="recalc()">
+          </div>
+        </div>
+      </div>
+
       <div class="section-title">🔧 今日やった追加作業</div>
       <div class="card" id="today_repairs">
         <!-- JSで生成 -->
+      </div>
+
+      <!-- 追加項目（自由入力） -->
+      <div class="section-title">✏️ 追加項目（自由入力）</div>
+      <div class="card">
+        <div id="custom_est_items_area">
+          <div class="custom-est-row" style="display:flex;gap:6px;margin-bottom:6px">
+            <input type="text" class="custom-est-name" placeholder="項目名" style="flex:2;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem">
+            <input type="number" class="custom-est-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem" oninput="recalc()">
+          </div>
+        </div>
+        <button type="button" onclick="addCustomEstItem()" style="background:#eee;border:1px solid #ccc;border-radius:8px;padding:8px 16px;font-size:.85rem;cursor:pointer;margin-top:4px">＋ 項目を追加</button>
       </div>
 
       <div class="total-box">
@@ -473,12 +534,13 @@ const P = {
 function applyRepairMode() {
   if (!P.is_repair || !P.order_items || P.order_items.length === 0) return;
 
-  // 「💰 今日の費用」カードごと非表示（修理案件は診断費なし）
-  const diagSection = document.getElementById('diag_fee_section');
-  if (diagSection) diagSection.style.display = 'none';
+  // 「💰 今日の費用」のラベルを「修理費」に変更（非表示にせず動的表示）
+  document.getElementById('diag_fee_label').textContent = '修理費';
+  document.getElementById('diag_fee_display').textContent = '¥0';
 
   // 修理メニューに order_items の数量をセット
   P.order_items.forEach(function(item) {
+    // 修理メニューと照合
     const idx = REPAIR_MENU.findIndex(function(m) { return m.name === item.name; });
     if (idx >= 0) {
       const qty = parseInt(item.qty) || 1;
@@ -488,6 +550,14 @@ function applyRepairMode() {
         const row = document.getElementById('today_row_' + idx);
         if (row) row.classList.add('active');
       }
+    } else {
+      // 追加条件エリアと照合（高所危険作業など）
+      document.querySelectorAll('#inv_options_area .inv-est-row').forEach(function(row) {
+        if (row.dataset.invName === item.name && item.price) {
+          const input = row.querySelector('.inv-est-price');
+          if (input) input.value = item.price;
+        }
+      });
     }
   });
 
@@ -660,16 +730,54 @@ function changeQty(prefix, idx, delta) {
   recalc();
 }
 
+// === 追加項目（自由入力）を取得 ===
+function getCustomEstItems() {
+  const items = [];
+  document.querySelectorAll('#custom_est_items_area .custom-est-row').forEach(function(row) {
+    const name = row.querySelector('.custom-est-name').value.trim();
+    const price = parseInt(row.querySelector('.custom-est-price').value) || 0;
+    if (name && price > 0) items.push({ name: name, price: price, qty: 1, subtotal: price });
+  });
+  return items;
+}
+
+// === 追加項目を追加 ===
+function addCustomEstItem() {
+  const area = document.getElementById('custom_est_items_area');
+  const div = document.createElement('div');
+  div.className = 'custom-est-row';
+  div.style = 'display:flex;gap:6px;margin-bottom:6px';
+  div.innerHTML = '<input type="text" class="custom-est-name" placeholder="項目名" style="flex:2;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem">'
+    + '<input type="number" class="custom-est-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem" oninput="recalc()">'
+    + '<button type="button" onclick="this.parentElement.remove();recalc()" style="background:#ff5252;color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:1rem;flex-shrink:0">×</button>';
+  area.appendChild(div);
+}
+
 // === 合計再計算 ===
 function recalc() {
+  // 追加条件（高所危険作業など）
+  let invTotal = 0;
+  document.querySelectorAll('#inv_options_area .inv-est-price').forEach(function(input) {
+    invTotal += parseInt(input.value) || 0;
+  });
+
+  // 修理メニュー
   let todayRepair = 0;
   REPAIR_MENU.forEach((item, i) => {
     const qty = parseInt(document.getElementById('today_qty_' + i).textContent);
     todayRepair += item.price * qty;
   });
-  // ★ 修理案件は initial_fee=0 なので、修理項目合計がそのまま今日の合計になる
-  const todayTotal = P.initial_fee + todayRepair;
+
+  // 追加項目（自由入力）
+  let customTotal = 0;
+  getCustomEstItems().forEach(it => { customTotal += it.subtotal; });
+
+  // 診断費 or 修理費 + 追加条件 + 修理メニュー + 自由入力 の合計
+  const todayTotal = P.initial_fee + todayRepair + invTotal + customTotal;
   document.getElementById('today_total').textContent = '¥' + todayTotal.toLocaleString();
+
+  // 「💰 今日の費用」の金額を合計と完全同期
+  document.getElementById('diag_fee_display').textContent = '¥' + todayTotal.toLocaleString();
 
   let estTotal = 0;
   REPAIR_MENU.forEach((item, i) => {
@@ -706,6 +814,21 @@ document.querySelectorAll('input[name="payment"]').forEach(radio => {
   });
 });
 
+// === 手入力モード：作業種別切替（故障診断 / 修理） ===
+function onWorkTypeChange() {
+  const val = document.querySelector('input[name="manual_work_type"]:checked').value;
+  if (val === '修理') {
+    P.is_repair = true;
+    P.initial_fee = 0;
+    document.getElementById('diag_fee_label').textContent = '修理費';
+  } else {
+    P.is_repair = false;
+    P.initial_fee = 9900;
+    document.getElementById('diag_fee_label').textContent = '故障診断費';
+  }
+  recalc();
+}
+
 // === 契約状況の切替 ===
 function onStatusChange() {
   setTimeout(() => {
@@ -722,6 +845,11 @@ function onStatusChange() {
     document.getElementById('section_reserve_est').classList.toggle('hidden', !isReserveEst);
     document.getElementById('section_reason').classList.toggle('hidden', !(isLoss || isCancel));
     document.getElementById('section_reserve_datetime').classList.toggle('hidden', !isReserve);
+
+    // ★ パラメータなし（手入力モード）かつ完工のときだけ作業種別トグルを表示
+    const hasData = !!(P.case_id || P.name);
+    const toggle = document.getElementById('work_type_toggle');
+    if (toggle) toggle.style.display = (isKankou && !hasData) ? 'block' : 'none';
 
     document.getElementById('notice_loss').classList.toggle('hidden', !isLoss);
     document.getElementById('notice_cancel').classList.toggle('hidden', !isCancel);
@@ -817,6 +945,25 @@ async function submitReport() {
   const todayItems = isKankou ? getSelectedItems('today') : [];
   let todayRepairTotal = 0;
   todayItems.forEach(it => todayRepairTotal += it.subtotal);
+
+  // ★ 追加条件（高所危険作業など）の金額を取得してtodayItemsに追加
+  let invTotal = 0;
+  if (isKankou) {
+    document.querySelectorAll('#inv_options_area .inv-est-row').forEach(function(row) {
+      const price = parseInt(row.querySelector('.inv-est-price').value) || 0;
+      if (price > 0) {
+        const name = row.dataset.invName;
+        todayItems.push({ name: name, price: price, qty: 1, subtotal: price });
+        invTotal += price;
+      }
+    });
+    // 追加項目（自由入力）も追加
+    getCustomEstItems().forEach(function(item) {
+      todayItems.push(item);
+      invTotal += item.subtotal;
+    });
+    todayRepairTotal += invTotal;
+  }
 
   let hasEstimate = false;
   let estItems = [];
