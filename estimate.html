@@ -311,18 +311,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         </div>
       </div>
 
-      <!-- 💰 今日の費用（修理案件時は「修理費＋合計額」を動的表示） -->
-      <div id="diag_fee_section">
-        <div class="section-title">💰 今日の費用</div>
-        <div class="card">
-          <div id="diag_fee_row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
-            <span id="diag_fee_label" style="font-weight:600">故障診断費</span>
-            <span style="font-weight:700;color:var(--blue)" id="diag_fee_display">¥9,900</span>
-          </div>
-        </div>
-      </div>
-
       <!-- 追加条件（高所危険作業など） -->
+      <div id="add_conditions_section">
       <div class="section-title">📋 追加条件</div>
       <div class="card">
         <div style="font-size:.82rem;color:var(--text-sub);margin-bottom:10px">該当する項目に金額を入力してください</div>
@@ -353,11 +343,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           </div>
         </div>
       </div>
+      </div><!-- /add_conditions_section -->
 
+      <div id="today_repairs_section">
       <div class="section-title">🔧 今日やった追加作業</div>
       <div class="card" id="today_repairs">
         <!-- JSで生成 -->
       </div>
+      </div><!-- /today_repairs_section -->
 
       <!-- 追加項目（自由入力） -->
       <div class="section-title">✏️ 追加項目（自由入力）</div>
@@ -539,10 +532,6 @@ const P = {
 function applyRepairMode() {
   if (!P.is_repair || !P.order_items || P.order_items.length === 0) return;
 
-  // 「💰 今日の費用」のラベルを「修理費」に変更（非表示にせず動的表示）
-  document.getElementById('diag_fee_label').textContent = '修理費';
-  document.getElementById('diag_fee_display').textContent = '¥0';
-
   // 修理メニューに order_items の数量をセット
   P.order_items.forEach(function(item) {
     // 修理メニューと照合
@@ -574,7 +563,6 @@ function applyRepairMode() {
 function initUI() {
   document.getElementById('h_case_id').textContent = P.case_id || '未設定';
   document.getElementById('h_name').textContent = P.name || '未設定';
-  document.getElementById('diag_fee_display').textContent = '¥' + P.initial_fee.toLocaleString();
   document.getElementById('today_total').textContent = '¥' + P.initial_fee.toLocaleString();
   if (P.staff_id) {
     let sid = String(P.staff_id);
@@ -605,6 +593,10 @@ function initUI() {
   // ★ 修理案件モードを適用
   applyRepairMode();
 
+  // ★ プレフィックスに応じてセクション表示制御
+  const casePrefix = (P.case_id || '').split('-')[0].toUpperCase();
+  applyPrefixUI(casePrefix);
+
   // ★ 初期状態でもステータス表示を反映（完工がデフォルト選択されているため）
   onStatusChange();
 }
@@ -616,6 +608,23 @@ function onPrefixChange() {
   alphaEl.style.display = (prefix === 'YA') ? '' : 'none';
   if (prefix !== 'YA') alphaEl.value = '';
   updateCaseIdPreview();
+  applyPrefixUI(prefix);
+}
+
+// === プレフィックスに応じてセクション表示制御 ===
+function applyPrefixUI(prefix) {
+  const isEC = (prefix === 'EC');
+  const isHC = (prefix === 'HC');
+  // EC-/HC-: 🔧 今日やった追加作業 を非表示
+  document.getElementById('today_repairs_section').style.display = (isEC || isHC) ? 'none' : '';
+  // HC-: 📋 追加条件 も非表示
+  document.getElementById('add_conditions_section').style.display = isHC ? 'none' : '';
+  // HC-/EC-: initial_fee は 0（清掃・給湯器は診断費なし）
+  if (isHC) {
+    P.initial_fee = 0;
+    P.is_repair = false;
+    recalc();
+  }
 }
 
 function buildCaseId() {
@@ -672,8 +681,9 @@ function syncManualInputs() {
         P.staff_id = r.staff_id || P.staff_id;
         P.payment_method = r.payment_method || '';
 
-        // ★ order_items があれば修理案件フラグを立てる
-        if (r.order_items && r.order_items.length > 0) {
+        // ★ order_items があり、かつHC-/EC-以外なら修理案件フラグを立てる
+        const pfx = (r.case_id || P.case_id || '').split('-')[0].toUpperCase();
+        if (r.order_items && r.order_items.length > 0 && pfx !== 'HC' && pfx !== 'EC') {
           P.order_items = r.order_items;
           P.is_repair = true;
           P.initial_fee = 0; // 修理案件は診断費0扱い（修理項目の合計が全額）
@@ -799,9 +809,6 @@ function recalc() {
   const todayTotal = P.initial_fee + todayRepair + invTotal + customTotal;
   document.getElementById('today_total').textContent = '¥' + todayTotal.toLocaleString();
 
-  // 「💰 今日の費用」の金額を合計と完全同期
-  document.getElementById('diag_fee_display').textContent = '¥' + todayTotal.toLocaleString();
-
   let estTotal = 0;
   REPAIR_MENU.forEach((item, i) => {
     const qty = parseInt(document.getElementById('est_qty_' + i).textContent);
@@ -843,11 +850,9 @@ function onWorkTypeChange() {
   if (val === '修理') {
     P.is_repair = true;
     P.initial_fee = 0;
-    document.getElementById('diag_fee_label').textContent = '修理費';
   } else {
     P.is_repair = false;
     P.initial_fee = 9900;
-    document.getElementById('diag_fee_label').textContent = '故障診断費';
   }
   recalc();
 }
