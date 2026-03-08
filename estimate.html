@@ -120,10 +120,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           <!-- プレフィックス選択 -->
           <select id="case_prefix" onchange="onPrefixChange()" style="padding:10px 8px;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-weight:700;color:var(--blue);background:#fff;min-width:80px">
             <option value="YA">YA</option>
-            <option value="CP">CP</option>
-            <option value="HC">HC</option>
             <option value="HM">HM</option>
+            <option value="CP">CP</option>
             <option value="EC">EC</option>
+            <option value="HC">HC</option>
           </select>
           <!-- YA専用：A〜Zアルファベット選択 -->
           <select id="case_alpha" style="padding:10px 8px;border:2px solid var(--blue);border-radius:8px;font-size:1rem;font-weight:700;color:var(--blue);background:#e8f2fc;min-width:64px">
@@ -311,7 +311,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         </div>
       </div>
 
-      <!-- 追加条件（高所危険作業など） -->
+      <!-- HC-手入力モード専用：清掃作業固定表示 -->
+      <div id="work_type_fixed_hc" style="display:none">
+        <div class="section-title">🔨 作業種別</div>
+        <div class="card">
+          <div style="font-weight:600;color:var(--blue);padding:8px 0">🧹 清掃作業</div>
+          <input type="hidden" name="manual_work_type_fixed" value="清掃作業">
+        </div>
+      </div>
       <div id="add_conditions_section">
       <div class="section-title">📋 追加条件</div>
       <div class="card">
@@ -432,6 +439,24 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <div id="reserve_est_repairs">
         <!-- JSで生成 -->
       </div>
+
+      <!-- 見積あり：追加項目（自由入力） -->
+      <div class="section-title">✏️ 追加項目（自由入力）</div>
+      <div class="card">
+        <div id="resest_custom_items_area">
+          <div class="custom-est-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
+            <input type="text" class="resest-custom-name" placeholder="項目名" style="flex:2;min-width:100px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem">
+            <input type="number" class="resest-custom-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;min-width:90px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem" oninput="recalc()">
+            <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+              <button type="button" onclick="resestCustomQtyChange(this,-1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:#eee;color:#555">-</button>
+              <span class="resest-custom-qty" style="font-weight:700;width:20px;text-align:center">1</span>
+              <button type="button" onclick="resestCustomQtyChange(this,1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:var(--blue);color:#fff">+</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" onclick="addResestCustomItem()" style="background:#eee;border:1px solid #ccc;border-radius:8px;padding:8px 16px;font-size:.85rem;cursor:pointer;margin-top:4px">＋ 項目を追加</button>
+      </div>
+
       <div class="estimate-total-box">
         <div class="estimate-total-label">見積り合計（税込）</div>
         <div class="estimate-total-amount" id="res_est_total">¥0</div>
@@ -615,15 +640,26 @@ function onPrefixChange() {
 function applyPrefixUI(prefix) {
   const isEC = (prefix === 'EC');
   const isHC = (prefix === 'HC');
+
   // EC-/HC-: 🔧 今日やった追加作業 を非表示
   document.getElementById('today_repairs_section').style.display = (isEC || isHC) ? 'none' : '';
+  // EC-/HC-: 予約見積あり内の修理メニューも非表示
+  document.getElementById('reserve_est_repairs').style.display = (isEC || isHC) ? 'none' : '';
   // HC-: 📋 追加条件 も非表示
   document.getElementById('add_conditions_section').style.display = isHC ? 'none' : '';
-  // HC-/EC-: initial_fee は 0（清掃・給湯器は診断費なし）
+
+  // HC-手入力モード: 作業種別を「清掃作業」固定にする
+  const toggle = document.getElementById('work_type_toggle');
+  const toggleFixed = document.getElementById('work_type_fixed_hc');
   if (isHC) {
+    if (toggle) toggle.style.display = 'none';
+    if (toggleFixed) toggleFixed.style.display = 'block';
     P.initial_fee = 0;
     P.is_repair = false;
     recalc();
+  } else {
+    if (toggleFixed) toggleFixed.style.display = 'none';
+    // work_type_toggleはonStatusChangeが制御するので触らない
   }
 }
 
@@ -786,6 +822,44 @@ function addCustomEstItem() {
   area.appendChild(div);
 }
 
+// === 見積あり：追加項目（自由入力）数量変更 ===
+function resestCustomQtyChange(btn, delta) {
+  const span = btn.parentElement.querySelector('.resest-custom-qty');
+  let n = parseInt(span.textContent) + delta;
+  if (n < 1) n = 1;
+  span.textContent = n;
+  recalc();
+}
+
+// === 見積あり：追加項目を追加 ===
+function addResestCustomItem() {
+  const area = document.getElementById('resest_custom_items_area');
+  const div = document.createElement('div');
+  div.className = 'custom-est-row';
+  div.style = 'display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
+  div.innerHTML = '<input type="text" class="resest-custom-name" placeholder="項目名" style="flex:2;min-width:100px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem">'
+    + '<input type="number" class="resest-custom-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;min-width:90px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:.95rem" oninput="recalc()">'
+    + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
+    + '<button type="button" onclick="resestCustomQtyChange(this,-1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:#eee;color:#555">-</button>'
+    + '<span class="resest-custom-qty" style="font-weight:700;width:20px;text-align:center">1</span>'
+    + '<button type="button" onclick="resestCustomQtyChange(this,1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:var(--blue);color:#fff">+</button>'
+    + '</div>'
+    + '<button type="button" onclick="this.closest(\'.custom-est-row\').remove();recalc()" style="background:#ff5252;color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;flex-shrink:0">×</button>';
+  area.appendChild(div);
+}
+
+// === 見積あり：追加項目を取得 ===
+function getResestCustomItems() {
+  const items = [];
+  document.querySelectorAll('#resest_custom_items_area .custom-est-row').forEach(function(row) {
+    const name = row.querySelector('.resest-custom-name').value.trim();
+    const price = parseInt(row.querySelector('.resest-custom-price').value) || 0;
+    const qty = parseInt(row.querySelector('.resest-custom-qty').textContent) || 1;
+    if (name && price > 0) items.push({ name: name, price: price, qty: qty, subtotal: price * qty });
+  });
+  return items;
+}
+
 // === 合計再計算 ===
 function recalc() {
   // 追加条件（高所危険作業など）
@@ -794,10 +868,12 @@ function recalc() {
     invTotal += parseInt(input.value) || 0;
   });
 
-  // 修理メニュー
+  // 修理メニュー（非表示または未生成の場合はスキップ）
   let todayRepair = 0;
   REPAIR_MENU.forEach((item, i) => {
-    const qty = parseInt(document.getElementById('today_qty_' + i).textContent);
+    const el = document.getElementById('today_qty_' + i);
+    if (!el) return;
+    const qty = parseInt(el.textContent) || 0;
     todayRepair += item.price * qty;
   });
 
@@ -811,16 +887,21 @@ function recalc() {
 
   let estTotal = 0;
   REPAIR_MENU.forEach((item, i) => {
-    const qty = parseInt(document.getElementById('est_qty_' + i).textContent);
+    const el = document.getElementById('est_qty_' + i);
+    if (!el) return;
+    const qty = parseInt(el.textContent) || 0;
     estTotal += item.price * qty;
   });
   document.getElementById('est_total').textContent = '¥' + estTotal.toLocaleString();
 
   let resEstTotal = 0;
   REPAIR_MENU.forEach((item, i) => {
-    const qty = parseInt(document.getElementById('resest_qty_' + i).textContent);
+    const el = document.getElementById('resest_qty_' + i);
+    if (!el) return;
+    const qty = parseInt(el.textContent) || 0;
     resEstTotal += item.price * qty;
   });
+  getResestCustomItems().forEach(it => { resEstTotal += it.subtotal; });
   document.getElementById('res_est_total').textContent = '¥' + resEstTotal.toLocaleString();
 }
 
@@ -874,10 +955,13 @@ function onStatusChange() {
     document.getElementById('section_reason').classList.toggle('hidden', !(isLoss || isCancel));
     document.getElementById('section_reserve_datetime').classList.toggle('hidden', !isReserve);
 
-    // ★ パラメータなし（手入力モード）かつ完工のときだけ作業種別トグルを表示
+    // ★ パラメータなし（手入力モード）かつ完工のときだけ作業種別トグルを表示（HC-は除く）
     const hasData = !!(P.case_id || P.name);
+    const casePrefix = (P.case_id || '').split('-')[0].toUpperCase();
+    const isHCPrefix = casePrefix === 'HC' ||
+      (document.getElementById('case_prefix') && document.getElementById('case_prefix').value === 'HC');
     const toggle = document.getElementById('work_type_toggle');
-    if (toggle) toggle.style.display = (isKankou && !hasData) ? 'block' : 'none';
+    if (toggle) toggle.style.display = (isKankou && !hasData && !isHCPrefix) ? 'block' : 'none';
 
     document.getElementById('notice_loss').classList.toggle('hidden', !isLoss);
     document.getElementById('notice_cancel').classList.toggle('hidden', !isCancel);
@@ -1008,6 +1092,7 @@ async function submitReport() {
   } else if (isReserveEst) {
     hasEstimate = true;
     estItems = getSelectedItems('resest');
+    getResestCustomItems().forEach(function(item) { estItems.push(item); });
     estItems.forEach(it => estTotal += it.subtotal);
     estExpiry = document.getElementById('res_est_expiry').value;
     estNote = document.getElementById('res_est_note').value;
