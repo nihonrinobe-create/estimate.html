@@ -698,16 +698,21 @@ function syncManualInputs() {
   document.getElementById('h_name').textContent = P.name || '未設定';
 }
 
-// 短縮URL: ?c=CASE_ID のみの場合、GASからデータ取得
+// 短縮URL: ?c=CASE_ID または ?c=AC-... のみの場合、GASからデータ取得
 (async function() {
   if (P.case_id && !params.get('name') && !params.get('initial_fee')) {
     try {
       document.getElementById('h_case_id').textContent = P.case_id + '（読込中...）';
+      // AC-で始まる場合はcontract_id、それ以外はcase_idでlookup
+      const isContractId = P.case_id.startsWith('AC-');
+      const lookupBody = isContractId
+        ? { form_type: 'lookup', contract_id: P.case_id }
+        : { form_type: 'lookup', case_id: P.case_id };
       const resp = await fetch(GAS_API_URL, {
-        method: 'POST', body: JSON.stringify({ form_type: 'lookup', case_id: P.case_id })
+        method: 'POST', body: JSON.stringify(lookupBody)
       });
       const r = await resp.json();
-      if (r.ok) {
+      if (r && !r.error) {
         P.name = r.name || P.name;
         P.email = r.email || P.email;
         P.tel = r.tel || P.tel;
