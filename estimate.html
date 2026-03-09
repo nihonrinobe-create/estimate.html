@@ -553,34 +553,59 @@ const P = {
   is_repair:   false,  // ★ 修理案件フラグ
 };
 
-// ★ 修理案件かどうかを判定し、UIを切り替える
+// ★ order_itemsをUIに展開（修理案件 + HC-/EC-カスタム項目どちらも対応）
 function applyRepairMode() {
-  if (!P.is_repair || !P.order_items || P.order_items.length === 0) return;
+  if (!P.order_items || P.order_items.length === 0) return;
 
-  // 修理メニューに order_items の数量をセット
   P.order_items.forEach(function(item) {
-    // 修理メニューと照合
-    const idx = REPAIR_MENU.findIndex(function(m) { return m.name === item.name; });
-    if (idx >= 0) {
-      const qty = parseInt(item.qty) || 1;
-      const span = document.getElementById('today_qty_' + idx);
-      if (span) {
-        span.textContent = qty;
-        const row = document.getElementById('today_row_' + idx);
-        if (row) row.classList.add('active');
-      }
-    } else {
-      // 追加条件エリアと照合（高所危険作業など）
-      document.querySelectorAll('#inv_options_area .inv-est-row').forEach(function(row) {
-        if (row.dataset.invName === item.name && item.price) {
-          const input = row.querySelector('.inv-est-price');
-          if (input) input.value = item.price;
+    // ① REPAIR_MENU照合（修理案件のとき）
+    if (P.is_repair) {
+      const idx = REPAIR_MENU.findIndex(function(m) { return m.name === item.name; });
+      if (idx >= 0) {
+        const qty = parseInt(item.qty) || 1;
+        const span = document.getElementById('today_qty_' + idx);
+        if (span) {
+          span.textContent = qty;
+          const row = document.getElementById('today_row_' + idx);
+          if (row) row.classList.add('active');
         }
-      });
+        return;
+      }
+    }
+
+    // ② 追加条件エリア照合（高所危険作業など）
+    let foundInv = false;
+    document.querySelectorAll('#inv_options_area .inv-est-row').forEach(function(row) {
+      if (row.dataset.invName === item.name && item.price) {
+        const input = row.querySelector('.inv-est-price');
+        if (input) { input.value = item.price; foundInv = true; }
+      }
+    });
+    if (foundInv) return;
+
+    // ③ どこにも該当しない → カスタム項目エリアに展開
+    const area = document.getElementById('custom_est_items_area');
+    // 既存の空行を探して使うか、新規追加
+    let targetRow = null;
+    area.querySelectorAll('.custom-est-row').forEach(function(row) {
+      const nameInput = row.querySelector('.custom-est-name');
+      if (!targetRow && nameInput && !nameInput.value.trim()) targetRow = row;
+    });
+    if (!targetRow) {
+      addCustomEstItem();
+      const rows = area.querySelectorAll('.custom-est-row');
+      targetRow = rows[rows.length - 1];
+    }
+    if (targetRow) {
+      const nameInput = targetRow.querySelector('.custom-est-name');
+      const priceInput = targetRow.querySelector('.custom-est-price');
+      const qtySpan = targetRow.querySelector('.custom-est-qty');
+      if (nameInput) nameInput.value = item.name;
+      if (priceInput) priceInput.value = item.price;
+      if (qtySpan) qtySpan.textContent = parseInt(item.qty) || 1;
     }
   });
 
-  // 合計を再計算
   recalc();
 }
 
@@ -723,15 +748,17 @@ function syncManualInputs() {
         P.staff_id = r.staff_id || P.staff_id;
         P.payment_method = r.payment_method || '';
 
-        // ★ order_items があり、かつHC-/EC-以外で、診断費でないものが含まれていれば修理案件フラグを立てる
+        // ★ order_items から診断費以外を取り出す（HC-/EC-も含め常にセット）
         const pfx = (r.case_id || P.case_id || '').split('-')[0].toUpperCase();
         const repairItems = (r.order_items || []).filter(function(it) {
           return it.name && !it.name.startsWith('故障診断');
         });
-        if (repairItems.length > 0 && pfx !== 'HC' && pfx !== 'EC') {
+        if (repairItems.length > 0) {
           P.order_items = repairItems;
-          P.is_repair = true;
-          P.initial_fee = 0; // 修理案件は診断費0扱い（修理項目の合計が全額）
+          if (pfx !== 'HC' && pfx !== 'EC') {
+            P.is_repair = true;
+            P.initial_fee = 0;
+          }
         }
 
         // 支払い方法を自動設定
