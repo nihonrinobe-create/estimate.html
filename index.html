@@ -117,6 +117,9 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
 
 <div class="container">
 
+  <!-- リピート用バナー（JSで動的表示） -->
+  <div id="repeat_banner" style="display:none;margin-bottom:12px;padding:12px 16px;background:#fff3cd;border-left:4px solid #f0a500;border-radius:8px;font-size:.93rem;font-weight:600;color:#7a5000"></div>
+
   <!-- ===== STEP 1: 顧客情報 ===== -->
   <div class="step active" id="step1">
     <div class="card">
@@ -540,6 +543,7 @@ function onIndexPrefixChange() {
     // 修理ラジオを原因究明に戻す
     const diagRadio = document.querySelector('input[name="order_type"][value="原因究明作業"]');
     if (diagRadio) diagRadio.checked = true;
+    toggleWorkMenus(); // ← 追加：故障診断費用バナーも更新
   } else {
     // YA / HM / CP: 通常
     orderTypeGrid.style.display  = '';
@@ -621,6 +625,14 @@ window.onload = async function() {
         if (r.banchi)   document.getElementById('c_banchi').value = r.banchi;
         if (r.building) document.getElementById('c_building').value = r.building;
         if (r.staff_id) document.getElementById('c_emp_id').value = r.staff_id;
+        // リピート用バナー表示
+        if (p.get('repeat')) {
+          const banner = document.getElementById('repeat_banner');
+          if (banner) {
+            banner.textContent = '🔁 リピート受付　案件番号: ' + r.case_id + ' ／ ' + r.name + ' 様';
+            banner.style.display = 'block';
+          }
+        }
       }
     } catch(e) { console.log('lookup error', e); }
   } else {
