@@ -238,8 +238,8 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
           <label class="order-type-label"><input type="radio" name="order_type" value="原因究明作業" checked onclick="toggleWorkMenus()">原因究明作業</label>
           <label class="order-type-label"><input type="radio" name="order_type" value="修理" onclick="toggleWorkMenus()">修理</label>
         </div>
-        <!-- 故障診断費用の表示 -->
-        <div id="diag_fee_notice" style="margin-top:8px;padding:10px 14px;background:#e8f4fd;border-left:4px solid var(--blue);border-radius:6px;font-size:.92rem;font-weight:600;color:var(--blue)">
+        <!-- 故障診断費用の表示（原因究明選択時のみ表示） -->
+        <div id="diag_fee_notice" style="display:none;margin-top:8px;padding:10px 14px;background:#e8f4fd;border-left:4px solid var(--blue);border-radius:6px;font-size:.92rem;font-weight:600;color:var(--blue)">
           🔍 故障診断費用　9,000円（税抜）
         </div>
 
@@ -700,7 +700,14 @@ function toggleWorkMenus() {
   if (prefix === 'EC' || prefix === 'HC') {
     document.getElementById('repair_options_area').style.display = 'none';
     document.getElementById('investigation_options_area').style.display = (prefix === 'EC') ? 'block' : 'none';
-    if (diagNotice) diagNotice.style.display = 'none';
+    // HC: 故障診断費用は常に非表示
+    if (prefix === 'HC') {
+      if (diagNotice) diagNotice.style.display = 'none';
+    } else {
+      // EC: ラジオボタンの選択に従う
+      const ecRepair = document.querySelector('input[name="order_type"][value="修理"]');
+      if (diagNotice) diagNotice.style.display = (ecRepair && ecRepair.checked) ? 'none' : 'block';
+    }
     return;
   }
   const isRepair = document.querySelector('input[name="order_type"][value="修理"]');
