@@ -248,25 +248,25 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
         <div id="investigation_options_area">
           <div style="font-weight:600;font-size:.9rem;margin-bottom:8px;color:var(--green)">追加条件（該当する項目に金額を入力）</div>
           <div class="inv-items">
-            <div class="inv-item-row" data-inv-name="高所危険作業"><div class="inv-label">高所危険作業</div><input type="number" class="inv-price" placeholder="金額（税込）" inputmode="numeric"></div>
-            <div class="inv-item-row" data-inv-name="業務用点検"><div class="inv-label">業務用点検</div><input type="number" class="inv-price" placeholder="金額（税込）" inputmode="numeric"></div>
-            <div class="inv-item-row" data-inv-name="室外機特殊設置"><div class="inv-label">室外機特殊設置</div><input type="number" class="inv-price" placeholder="金額（税込）" inputmode="numeric"></div>
-            <div class="inv-item-row" data-inv-name="電気系統調査"><div class="inv-label">電気系統調査</div><input type="number" class="inv-price" placeholder="金額（税込）" inputmode="numeric"></div>
+            <div class="inv-item-row" data-inv-name="高所危険作業"><div class="inv-label">高所危険作業</div><input type="number" class="inv-price" placeholder="金額（税抜）" inputmode="numeric"></div>
+            <div class="inv-item-row" data-inv-name="業務用点検"><div class="inv-label">業務用点検</div><input type="number" class="inv-price" placeholder="金額（税抜）" inputmode="numeric"></div>
+            <div class="inv-item-row" data-inv-name="室外機特殊設置"><div class="inv-label">室外機特殊設置</div><input type="number" class="inv-price" placeholder="金額（税抜）" inputmode="numeric"></div>
+            <div class="inv-item-row" data-inv-name="電気系統調査"><div class="inv-label">電気系統調査</div><input type="number" class="inv-price" placeholder="金額（税抜）" inputmode="numeric"></div>
           </div>
         </div>
 
         <!-- 修理メニュー -->
         <div id="repair_options_area">
-          <div class="repair-item-row" data-price="29700" data-name="冷媒ガス注入"><div class="repair-info">冷媒ガス注入（500gまで）<span class="repair-price">29,700円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="3300" data-name="冷媒ガス追加（100g）"><div class="repair-info">冷媒ガス追加（100g）<span class="repair-price">3,300円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="17600" data-name="真空引き"><div class="repair-info">真空引き<span class="repair-price">17,600円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="17600" data-name="フレア加工・バルブコア交換"><div class="repair-info">フレア加工・バルブコア交換<span class="repair-price">17,600円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="28600" data-name="水漏れ修復"><div class="repair-info">水漏れ修復<span class="repair-price">28,600円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="26400" data-name="四方弁動作不良解消"><div class="repair-info">四方弁動作不良解消<span class="repair-price">26,400円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="26400" data-name="電源部再接続"><div class="repair-info">電源部再接続<span class="repair-price">26,400円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="28600" data-name="エアコン標準取付"><div class="repair-info">エアコン標準取付<span class="repair-price">28,600円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="8800" data-name="エアコン取り外し"><div class="repair-info">エアコン取り外し<span class="repair-price">8,800円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
-          <div class="repair-item-row" data-price="26400" data-name="穴開け工事"><div class="repair-info">穴開け工事<span class="repair-price">26,400円〜</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="27000" data-name="冷媒ガス注入"><div class="repair-info">冷媒ガス注入（500gまで）<span class="repair-price">27,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="3000" data-name="冷媒ガス追加（100g）"><div class="repair-info">冷媒ガス追加（100g）<span class="repair-price">3,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="16000" data-name="真空引き"><div class="repair-info">真空引き<span class="repair-price">16,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="16000" data-name="フレア加工・バルブコア交換"><div class="repair-info">フレア加工・バルブコア交換<span class="repair-price">16,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="26000" data-name="水漏れ修復"><div class="repair-info">水漏れ修復<span class="repair-price">26,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="24000" data-name="四方弁動作不良解消"><div class="repair-info">四方弁動作不良解消<span class="repair-price">24,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="24000" data-name="電源部再接続"><div class="repair-info">電源部再接続<span class="repair-price">24,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="26000" data-name="エアコン標準取付"><div class="repair-info">エアコン標準取付<span class="repair-price">26,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="8000" data-name="エアコン取り外し"><div class="repair-info">エアコン取り外し<span class="repair-price">8,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
+          <div class="repair-item-row" data-price="24000" data-name="穴開け工事"><div class="repair-info">穴開け工事<span class="repair-price">24,000円〜（税抜）</span></div><div class="counter-ui"><button class="btn-circle btn-minus" onclick="changeCount(this,-1)">-</button><span class="count-num">0</span><button class="btn-circle btn-plus" onclick="changeCount(this,1)">+</button></div></div>
         </div>
       </div>
 
@@ -276,7 +276,7 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
         <div id="custom_items_area">
           <div class="custom-item-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
             <input type="text" class="custom-name" placeholder="項目名" style="flex:2;min-width:100px">
-            <input type="number" class="custom-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;min-width:90px">
+            <input type="number" class="custom-price" placeholder="金額（税抜）" inputmode="numeric" style="flex:1;min-width:90px">
             <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
               <button type="button" class="btn-circle btn-minus" onclick="customQtyChange(this,-1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:#eee;color:#555">-</button>
               <span class="custom-qty" style="font-weight:700;width:20px;text-align:center">1</span>
@@ -342,14 +342,22 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
           <thead>
             <tr style="background:var(--blue);color:#fff">
               <th style="padding:8px;text-align:left;border-radius:4px 0 0 0">項目</th>
-              <th style="padding:8px;text-align:right;width:70px">単価</th>
+              <th style="padding:8px;text-align:right;width:80px">単価(税抜)</th>
               <th style="padding:8px;text-align:center;width:40px">数</th>
-              <th style="padding:8px;text-align:right;border-radius:0 4px 0 0;width:80px">小計</th>
+              <th style="padding:8px;text-align:right;border-radius:0 4px 0 0;width:90px">小計(税抜)</th>
             </tr>
           </thead>
           <tbody id="est_items_body"></tbody>
         </table>
         <div style="margin-top:15px;padding:15px;background:#fff;border-radius:8px;border:2px solid var(--blue)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:.95rem;color:#555">合計金額（税抜）</span>
+            <span id="est_subtotal_ex" style="font-size:1rem;color:#555"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #ddd">
+            <span style="font-size:.95rem;color:#555">消費税（<span id="est_tax_rate_label">10</span>%）</span>
+            <span id="est_tax_amount" style="font-size:1rem;color:#555"></span>
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:1rem;font-weight:bold">合計金額（税込）</span>
             <span id="est_total" style="font-size:1.5rem;font-weight:bold;color:var(--blue)"></span>
@@ -457,7 +465,8 @@ function generateContractId() {
 }
 
 let currentStep = 1;
-let couponApplied = false;
+const TAX_RATE = 0.10; // 消費税率（変更時はここだけ修正）
+let couponDiscount = 0; // 税抜割引額（0=未適用）
 const CONSENT_PHRASE = '契約書面等をPDFメールで受領することに同意します';
 
 // ================================
@@ -718,7 +727,7 @@ function addCustomItem() {
   div.className = 'custom-item-row';
   div.style = 'display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
   div.innerHTML = '<input type="text" class="custom-name" placeholder="項目名" style="flex:2;min-width:100px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem">'
-    + '<input type="number" class="custom-price" placeholder="金額（税込）" inputmode="numeric" style="flex:1;min-width:90px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem">'
+    + '<input type="number" class="custom-price" placeholder="金額（税抜）" inputmode="numeric" style="flex:1;min-width:90px;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem">'
     + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
     + '<button type="button" onclick="customQtyChange(this,-1)" style="width:28px;height:28px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;background:#eee;color:#555">-</button>'
     + '<span class="custom-qty" style="font-weight:700;width:20px;text-align:center">1</span>'
@@ -734,22 +743,33 @@ function getCustomItems() {
     const name = row.querySelector('.custom-name').value.trim();
     const price = parseInt(row.querySelector('.custom-price').value) || 0;
     const qty = parseInt(row.querySelector('.custom-qty').textContent) || 1;
-    if (name && price > 0) items.push({ name, price, qty, subtotal: price * qty });
+    if (name && price > 0) { const taxInc = Math.round(price * (1 + TAX_RATE)); items.push({ name, price: taxInc, qty, subtotal: taxInc * qty }); }
   });
   return items;
 }
 
 // === クーポン ===
-function applyCoupon() {
-  const code = document.getElementById('c_coupon_code').value.trim().toLowerCase();
+async function applyCoupon() {
+  const code = document.getElementById('c_coupon_code').value.trim();
   const res = document.getElementById('coupon_result');
-  if (code === 'ac2026') {
-    couponApplied = true;
-    res.textContent = 'クーポン適用完了：-3,000円';
-    res.style.color = 'var(--green)';
-  } else {
-    couponApplied = false;
-    res.textContent = '無効なコードです';
+  if (!code) { res.textContent = 'コードを入力してください'; res.style.color = 'var(--red)'; return; }
+  res.textContent = '確認中...'; res.style.color = '#999';
+  try {
+    const r = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ form_type: 'coupon_lookup', code: code }) });
+    const data = await r.json();
+    if (data.ok) {
+      couponDiscount = Number(data.discount) || 0;
+      const taxInc = Math.round(couponDiscount * (1 + TAX_RATE));
+      res.textContent = 'クーポン適用完了：-' + taxInc.toLocaleString() + '円（税込）';
+      res.style.color = 'var(--green)';
+    } else {
+      couponDiscount = 0;
+      res.textContent = data.error || '無効なコードです';
+      res.style.color = 'var(--red)';
+    }
+  } catch(e) {
+    couponDiscount = 0;
+    res.textContent = '通信エラー';
     res.style.color = 'var(--red)';
   }
 }
@@ -867,8 +887,8 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
 function getInvOptions() {
   const items = [];
   document.querySelectorAll('.inv-item-row').forEach(row => {
-    const price = parseInt(row.querySelector('.inv-price').value) || 0;
-    if (price > 0) items.push({ name: row.dataset.invName, price: price });
+    const rawPrice = parseInt(row.querySelector('.inv-price').value) || 0;
+    if (rawPrice > 0) { const price = Math.round(rawPrice * (1 + TAX_RATE)); items.push({ name: row.dataset.invName, price: price }); }
   });
   return items;
 }
@@ -885,7 +905,7 @@ function calculateRepairTotal() {
   let total = 0;
   document.querySelectorAll('.repair-item-row').forEach(row => {
     const cnt = parseInt(row.querySelector('.count-num').textContent);
-    if (cnt > 0) total += parseInt(row.dataset.price) * cnt;
+    if (cnt > 0) total += Math.round(parseInt(row.dataset.price) * (1 + TAX_RATE)) * cnt;
   });
   getCustomItems().forEach(c => { total += c.subtotal; });
   return total;
@@ -928,7 +948,7 @@ function nextStep() {
       const inv = getInvOptions();
       if (inv.length) extra = '<br><span style="font-size:.85rem;color:#666">└ ' + inv.map(v => v.name + (v.price ? '(¥'+v.price.toLocaleString()+')' : '')).join('、') + '</span>';
     }
-    let disc = couponApplied ? '<br><span style="color:#e65100;font-weight:bold">※クーポン適用：-3,000円</span>' : '';
+    let disc = couponDiscount > 0 ? '<br><span style="color:#e65100;font-weight:bold">※クーポン適用：-' + Math.round(couponDiscount*(1+TAX_RATE)).toLocaleString() + '円（税込）</span>' : '';
 
     document.getElementById('confirmContent').innerHTML =
       '<div class="confirm-row"><span class="confirm-label">案件番号</span><span class="confirm-val">' + d.case_id + '</span></div>' +
@@ -949,25 +969,26 @@ function nextStep() {
     const orderType = getOrderType();
     const equip = document.getElementById('c_equipment').value;
     const feeLabel = document.getElementById('fee_label');
-    let totalAmount = 0;
+    let subtotalEx = 0; // 税抜合計
     let estRows = '';
 
     if (orderType === '原因究明作業') {
       feeLabel.textContent = '故障診断費用（税込）';
-      const diagFee = equip.includes('業務用') ? 16500 : 9900;
-      totalAmount = diagFee;
+      const diagEx = equip.includes('業務用') ? 15000 : 9000; // 税抜
+      subtotalEx += diagEx;
       estRows = '<tr><td style="padding:8px;border-bottom:1px solid #ddd">故障診断（' + (equip || 'ルームエアコン') + '）</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagFee.toLocaleString() + '円</td>'
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagEx.toLocaleString() + '円</td>'
         + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagFee.toLocaleString() + '円</td></tr>';
-      const inv = getInvOptions();
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + diagEx.toLocaleString() + '円</td></tr>';
+      const inv = getInvOptions(); // getInvOptions は税込を返す → 税抜に戻す
       inv.forEach(v => {
         if (v.price > 0) {
-          totalAmount += v.price;
+          const priceEx = Math.round(v.price / (1 + TAX_RATE));
+          subtotalEx += priceEx;
           estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + v.name + '</td>'
-            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + v.price.toLocaleString() + '円</td>'
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + priceEx.toLocaleString() + '円</td>'
             + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
-            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + v.price.toLocaleString() + '円</td></tr>';
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + priceEx.toLocaleString() + '円</td></tr>';
         } else {
           estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd;color:#666;font-size:.85rem">' + v.name + '</td>'
             + '<td colspan="3" style="padding:8px;border-bottom:1px solid #ddd;color:#666;font-size:.85rem;text-align:right">※現地確認後にご案内</td></tr>';
@@ -979,39 +1000,49 @@ function nextStep() {
       document.querySelectorAll('.repair-item-row').forEach(row => {
         const cnt = parseInt(row.querySelector('.count-num').textContent);
         if (cnt > 0) {
-          const price = parseInt(row.dataset.price);
-          const sub = price * cnt;
-          totalAmount += sub;
+          const priceEx = parseInt(row.dataset.price); // data-priceは税抜
+          const subEx = priceEx * cnt;
+          subtotalEx += subEx;
           estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + row.dataset.name + '</td>'
-            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + price.toLocaleString() + '円</td>'
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + priceEx.toLocaleString() + '円</td>'
             + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">' + cnt + '</td>'
-            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + sub.toLocaleString() + '円</td></tr>';
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + subEx.toLocaleString() + '円</td></tr>';
         }
       });
     }
 
-    getCustomItems().forEach(c => {
-      totalAmount += c.subtotal;
-      estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + c.name + '</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + c.price.toLocaleString() + '円</td>'
-        + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + c.subtotal.toLocaleString() + '円</td></tr>';
+    getCustomItems().forEach(item => {
+      // getCustomItems()はtaxInc済みを返す → 税抜に戻す
+      const priceEx = Math.round(item.price / (1 + TAX_RATE));
+      const subEx = priceEx * item.qty;
+      subtotalEx += subEx;
+      estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + item.name + '</td>'
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + priceEx.toLocaleString() + '円</td>'
+        + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">' + item.qty + '</td>'
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + subEx.toLocaleString() + '円</td></tr>';
     });
 
-    if (couponApplied) {
+    // クーポン行（税抜で表示）
+    if (couponDiscount > 0) {
+      subtotalEx -= couponDiscount;
+      if (subtotalEx < 0) subtotalEx = 0;
       estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd;color:#e65100">クーポン割引</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd;color:#e65100">-3,000円</td>'
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd;color:#e65100">-' + couponDiscount.toLocaleString() + '円</td>'
         + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
-        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd;color:#e65100">-3,000円</td></tr>';
-      totalAmount -= 3000;
-      if (totalAmount < 0) totalAmount = 0;
+        + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd;color:#e65100">-' + couponDiscount.toLocaleString() + '円</td></tr>';
     }
+
+    const taxAmount = Math.round(subtotalEx * TAX_RATE);
+    const totalInc = subtotalEx + taxAmount;
 
     document.getElementById('est_customer_name').textContent = document.getElementById('c_name').value + ' 様';
     document.getElementById('est_date').textContent = '発行日：' + new Date().toLocaleDateString('ja-JP');
     document.getElementById('est_items_body').innerHTML = estRows;
-    document.getElementById('est_total').textContent = '¥' + totalAmount.toLocaleString();
-    document.getElementById('fee_diagnosis').value = totalAmount.toLocaleString('ja-JP') + '円';
+    document.getElementById('est_subtotal_ex').textContent = '¥' + subtotalEx.toLocaleString();
+    document.getElementById('est_tax_amount').textContent = '¥' + taxAmount.toLocaleString();
+    document.getElementById('est_tax_rate_label').textContent = Math.round(TAX_RATE * 100);
+    document.getElementById('est_total').textContent = '¥' + totalInc.toLocaleString();
+    document.getElementById('fee_diagnosis').value = totalInc.toLocaleString('ja-JP') + '円';
   }
 
   if (currentStep === 6) { doSubmit(); return; }
@@ -1038,7 +1069,7 @@ async function doSubmit() {
     const names = getSelectedRepairNames();
     if (names) orderInfo += '：' + names;
   }
-  if (couponApplied) orderInfo += ' 【クーポン利用(ac2026)】';
+  if (couponDiscount > 0) orderInfo += ' 【クーポン利用】';
   if (document.getElementById('req_sameday').checked) orderInfo += ' 【当日工事希望】';
 
   const customItems = getCustomItems();
@@ -1047,7 +1078,7 @@ async function doSubmit() {
   const ot = getOrderType();
   const equip = document.getElementById('c_equipment').value;
   if (ot === '原因究明作業') {
-    const diagFee = equip.includes('業務用') ? 16500 : 9900;
+    const diagFee = equip.includes('業務用') ? Math.round(15000 * (1 + TAX_RATE)) : Math.round(9000 * (1 + TAX_RATE));
     orderItems.push({ name: '故障診断（' + (equip || 'ルームエアコン') + '）', price: diagFee, qty: 1, subtotal: diagFee });
     getInvOptions().forEach(v => {
       if (v.price > 0) orderItems.push({ name: v.name, price: v.price, qty: 1, subtotal: v.price });
@@ -1062,7 +1093,7 @@ async function doSubmit() {
     });
   }
   customItems.forEach(c => orderItems.push({ name: c.name, price: c.price, qty: c.qty || 1, subtotal: c.subtotal }));
-  if (couponApplied) orderItems.push({ name: 'クーポン割引', price: -3000, qty: 1, subtotal: -3000 });
+  if (couponDiscount > 0) { const cd = -Math.round(couponDiscount * (1 + TAX_RATE)); orderItems.push({ name: 'クーポン割引', price: cd, qty: 1, subtotal: cd }); }
 
   const contractId = generateContractId();
 
