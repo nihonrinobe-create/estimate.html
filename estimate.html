@@ -608,7 +608,7 @@ function applyRepairMode() {
     document.querySelectorAll('#inv_options_area .inv-est-row').forEach(function(row) {
       if (row.dataset.invName === item.name && item.price) {
         const input = row.querySelector('.inv-est-price');
-        if (input) { input.value = item.price; foundInv = true; }
+        if (input) { input.value = Math.round(item.price / (1 + TAX_RATE)); foundInv = true; }
       }
     });
     if (foundInv) return;
@@ -631,7 +631,7 @@ function applyRepairMode() {
       const priceInput = targetRow.querySelector('.custom-est-price');
       const qtySpan = targetRow.querySelector('.custom-est-qty');
       if (nameInput) nameInput.value = item.name;
-      if (priceInput) priceInput.value = item.price;
+      if (priceInput) priceInput.value = Math.round(item.price / (1 + TAX_RATE));
       if (qtySpan) qtySpan.textContent = parseInt(item.qty) || 1;
     }
   });
@@ -774,7 +774,13 @@ function syncManualInputs() {
         P.tel = r.tel || P.tel;
         P.address = (r.address||'') + ' ' + (r.banchi||'');
         P.equipment = r.equipment || P.equipment;
-        P.initial_fee = parseInt(r.initial_fee) || P.initial_fee;
+        // initial_feeはorder_itemsの故障診断行から取得（tax-inc→tax-ex変換）
+        const diagItem = (r.order_items || []).find(function(it) { return it.name && it.name.startsWith('故障診断'); });
+        if (diagItem) {
+          P.initial_fee = Math.round((diagItem.price || 0) / (1 + TAX_RATE));
+        } else {
+          P.initial_fee = parseInt(r.initial_fee) || P.initial_fee;
+        }
         P.staff_id = r.staff_id || P.staff_id;
         P.payment_method = r.payment_method || '';
 
