@@ -838,6 +838,9 @@ function syncManualInputs() {
         }
       }
     } catch(e) { console.log('lookup error', e); }
+    // lookup後にヘッダーを再描画
+    document.getElementById('h_case_id').textContent = P.case_id || '未設定';
+    document.getElementById('h_name').textContent = P.name || '未設定';
   }
   initUI();
 
