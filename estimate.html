@@ -1183,7 +1183,7 @@ function onStatusChange() {
     const isDiagEst = (status === '診断見積のみ');
     const isReserve = isReserveEst || isReserveNo;
 
-    document.getElementById('section_kankou').classList.toggle('hidden', !isKankou);
+    document.getElementById('section_kankou').classList.toggle('hidden', !(isKankou || isDiagEst));
     document.getElementById('section_reserve_est').classList.toggle('hidden', !isReserveEst);
     document.getElementById('section_diag_est').classList.toggle('hidden', !isDiagEst);
     document.getElementById('section_reason').classList.toggle('hidden', !(isLoss || isCancel));
