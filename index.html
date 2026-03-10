@@ -323,8 +323,12 @@ body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--
           <label class="payment-label"><input type="radio" name="payment_method" value="ご相談">ご相談</label>
         </div>
         <div id="transfer_deadline_area" style="display:none;margin-top:10px">
-          <label style="font-size:.85rem;font-weight:600">振込期限</label>
+          <label style="font-size:.85rem;font-weight:600">振込期限 <span style="color:red;font-size:.8rem">※必須</span></label>
           <input type="date" id="transfer_deadline" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;margin-top:4px">
+        </div>
+        <div id="transfer_name_area" style="display:none;margin-top:10px">
+          <label style="font-size:.85rem;font-weight:600">振込名義 <span style="color:red;font-size:.8rem">※必須</span></label>
+          <input type="text" id="transfer_name" placeholder="例：ヤマダ タロウ" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;margin-top:4px;box-sizing:border-box">
         </div>
       </div>
     </div>
@@ -625,6 +629,9 @@ window.onload = async function() {
         if (r.banchi)   document.getElementById('c_banchi').value = r.banchi;
         if (r.building) document.getElementById('c_building').value = r.building;
         if (r.staff_id) document.getElementById('c_emp_id').value = r.staff_id;
+        if (r.transfer_name) {
+          document.getElementById('transfer_name').value = r.transfer_name;
+        }
         // リピート用バナー表示
         if (p.get('repeat')) {
           const banner = document.getElementById('repeat_banner');
@@ -858,6 +865,22 @@ function validateStep(step) {
     // HC-は症状不要
     if (prefix !== 'HC' && getSymptoms().length === 0) { setFieldError('f_symptom','症状を1つ以上選択してください'); ok=false; }
   }
+  if (step === 3) {
+    if (getPaymentMethod() === '銀行振り込み') {
+      const tDeadline = document.getElementById('transfer_deadline').value;
+      if (!tDeadline) {
+        alert('銀行振り込みの場合は振込期限を入力してください');
+        document.getElementById('transfer_deadline').focus();
+        ok = false;
+      }
+      const tName = document.getElementById('transfer_name').value.trim();
+      if (!tName) {
+        alert('銀行振り込みの場合は振込名義を入力してください');
+        document.getElementById('transfer_name').focus();
+        ok = false;
+      }
+    }
+  }
   if (step === 6) {
     const a1 = document.getElementById('agree_contract').checked;
     const consentInput = document.getElementById('consent_text').value.trim();
@@ -900,14 +923,17 @@ function getPaymentMethod() { return document.querySelector('input[name="payment
 document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
   radio.addEventListener('change', () => {
     const area = document.getElementById('transfer_deadline_area');
+    const nameArea = document.getElementById('transfer_name_area');
     if (getPaymentMethod() === '銀行振り込み') {
       area.style.display = 'block';
+      nameArea.style.display = 'block';
       if (!document.getElementById('transfer_deadline').value) {
         const d14 = new Date(); d14.setDate(d14.getDate() + 14);
         document.getElementById('transfer_deadline').value = d14.toISOString().split('T')[0];
       }
     } else {
       area.style.display = 'none';
+      nameArea.style.display = 'none';
     }
   });
 });
@@ -994,7 +1020,8 @@ function nextStep() {
       '<div class="confirm-row"><span class="confirm-label">症状</span><span class="confirm-val">' + sym + '</span></div>' +
       '<div class="confirm-row"><span class="confirm-label">作業</span><span class="confirm-val" style="color:var(--blue)">' + oType + extra + disc + '</span></div>' +
       '<div class="confirm-row"><span class="confirm-label">支払い</span><span class="confirm-val">' + pay +
-        (pay === '銀行振り込み' ? '<br><span style="font-size:.85rem;color:#666">振込期限: ' + (document.getElementById('transfer_deadline').value || '未設定') + '</span>' : '') +
+        (pay === '銀行振り込み' ? '<br><span style="font-size:.85rem;color:#666">振込期限: ' + (document.getElementById('transfer_deadline').value || '未設定') + '</span>' +
+          '<br><span style="font-size:.85rem;color:#666">振込名義: ' + (document.getElementById('transfer_name').value || '未入力') + '</span>' : '') +
       '</span></div>';
   }
 
@@ -1137,6 +1164,7 @@ async function doSubmit() {
     order_type: orderInfo,
     payment_method: getPaymentMethod(),
     transfer_deadline: getPaymentMethod() === '銀行振り込み' ? document.getElementById('transfer_deadline').value : '',
+    transfer_name: getPaymentMethod() === '銀行振り込み' ? document.getElementById('transfer_name').value.trim() : '',
     fee_diagnosis: document.getElementById('fee_diagnosis').value.replace(/[,円]/g, ''),
     cancel_rule: document.getElementById('cancel_rule').value,
     custom_items: customItems.length ? customItems.map(c => c.name + ':' + c.price).join('、') : '',
