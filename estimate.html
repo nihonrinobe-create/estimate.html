@@ -406,8 +406,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
             <label class="pay-label"><input type="radio" name="payment" value="後日請求">後日請求</label>
           </div>
           <div id="est_transfer_deadline_area" style="display:none;margin-top:10px">
-            <label style="font-size:.85rem;font-weight:600">振込期限</label>
+            <label style="font-size:.85rem;font-weight:600">振込期限 <span style="color:red;font-size:.8rem">※必須</span></label>
             <input type="date" id="est_transfer_deadline" style="width:100%;padding:10px;border:2px solid #d9dee4;border-radius:8px;font-size:1rem;margin-top:4px">
+          </div>
+          <div id="est_transfer_name_area" style="display:none;margin-top:10px">
+            <label style="font-size:.85rem;font-weight:600">振込名義 <span style="color:red;font-size:.8rem">※必須</span></label>
+            <input type="text" id="est_transfer_name" placeholder="例：ヤマダ タロウ" style="width:100%;padding:10px;border:2px solid #d9dee4;border-radius:8px;font-size:1rem;margin-top:4px;box-sizing:border-box">
           </div>
         </div>
       </div>
@@ -643,7 +647,6 @@ function applyRepairMode() {
 function initUI() {
   document.getElementById('h_case_id').textContent = P.case_id || '未設定';
   document.getElementById('h_name').textContent = P.name || '未設定';
-  document.getElementById('today_total').textContent = '¥' + P.initial_fee.toLocaleString();
   if (P.staff_id) {
     let sid = String(P.staff_id);
     while (sid.length > 0 && sid.length < 4) sid = '0' + sid;
@@ -676,6 +679,9 @@ function initUI() {
   // ★ プレフィックスに応じてセクション表示制御
   const casePrefix = (P.case_id || '').split('-')[0].toUpperCase();
   applyPrefixUI(casePrefix);
+
+  // ★ applyRepairMode が早期returnした場合も含め、必ず合計を再計算
+  recalc();
 
   // ★ 初期状態でもステータス表示を反映（完工がデフォルト選択されているため）
   onStatusChange();
@@ -714,7 +720,13 @@ function applyPrefixUI(prefix) {
     recalc();
   } else {
     if (toggleFixed) toggleFixed.style.display = 'none';
-    // work_type_toggleはonStatusChangeが制御するので触らない
+    // HC以外に切り替えたときはonStatusChangeに委ねつつ、診断費を復元してリセット
+    P.is_repair = false;
+    P.initial_fee = 9000;
+    // work_type_toggleの表示はonStatusChangeが判断するので再実行
+    onStatusChange();
+    // onStatusChangeはsetTimeout内なので、こちらで明示的に再計算
+    recalc();
   }
 }
 
@@ -779,7 +791,7 @@ function syncManualInputs() {
         if (diagItem) {
           P.initial_fee = Math.round((diagItem.price || 0) / (1 + TAX_RATE));
         } else {
-          P.initial_fee = parseInt(r.initial_fee) || P.initial_fee;
+          P.initial_fee = parseInt(r.initial_fee) ? Math.round(parseInt(r.initial_fee) / (1 + TAX_RATE)) : P.initial_fee;
         }
         P.staff_id = r.staff_id || P.staff_id;
         P.payment_method = r.payment_method || '';
@@ -813,6 +825,9 @@ function syncManualInputs() {
           });
           if (r.payment_method === '銀行振り込み' && r.transfer_deadline) {
             document.getElementById('est_transfer_deadline').value = r.transfer_deadline;
+          }
+          if (r.payment_method === '銀行振り込み' && r.transfer_name) {
+            document.getElementById('est_transfer_name').value = r.transfer_name;
           }
         }
       }
@@ -1039,13 +1054,18 @@ function toggleEstimate() {
 document.querySelectorAll('input[name="payment"]').forEach(radio => {
   radio.addEventListener('change', () => {
     const area = document.getElementById('est_transfer_deadline_area');
+    const nameArea = document.getElementById('est_transfer_name_area');
     if (document.querySelector('input[name="payment"]:checked').value === '銀行振り込み') {
       area.style.display = 'block';
+      nameArea.style.display = 'block';
       if (!document.getElementById('est_transfer_deadline').value) {
         const d14 = new Date(); d14.setDate(d14.getDate() + 14);
         document.getElementById('est_transfer_deadline').value = d14.toISOString().split('T')[0];
       }
-    } else { area.style.display = 'none'; }
+    } else {
+      area.style.display = 'none';
+      nameArea.style.display = 'none';
+    }
   });
 });
 
@@ -1057,7 +1077,7 @@ function onWorkTypeChange() {
     P.initial_fee = 0;
   } else {
     P.is_repair = false;
-    P.initial_fee = 9900;
+    P.initial_fee = 9000;
   }
   recalc();
 }
@@ -1181,6 +1201,28 @@ async function submitReport() {
     return;
   }
 
+  if (document.querySelector('input[name="payment"]:checked').value === '銀行振り込み') {
+    const tDeadline = document.getElementById('est_transfer_deadline').value;
+    if (!tDeadline) {
+      alert('銀行振り込みの場合は振込期限を入力してください');
+      document.getElementById('est_transfer_deadline').focus();
+      btn.disabled = false;
+      btn.textContent = isKankou ? '完了報告を送信' : isReserveEst ? '予約＋見積書を送信' : '予約として報告';
+      return;
+    }
+  }
+
+  if (isKankou && document.querySelector('input[name="payment"]:checked').value === '銀行振り込み') {
+    const tName = document.getElementById('est_transfer_name').value.trim();
+    if (!tName) {
+      alert('銀行振り込みの場合は振込名義を入力してください');
+      document.getElementById('est_transfer_name').focus();
+      btn.disabled = false;
+      btn.textContent = '完了報告を送信';
+      return;
+    }
+  }
+
   const todayItems = isKankou ? getSelectedItems('today') : [];
   let todayRepairTotal = 0;
   todayItems.forEach(it => todayRepairTotal += it.subtotal);
@@ -1251,6 +1293,7 @@ async function submitReport() {
       const d14 = new Date(); d14.setDate(d14.getDate() + 14);
       return d14.toISOString().split('T')[0];
     })(),
+    transfer_name: (isKankou && document.querySelector('input[name="payment"]:checked').value === '銀行振り込み') ? document.getElementById('est_transfer_name').value.trim() : '',
 
     has_estimate: hasEstimate,
     estimate_repairs: estItems,  // 全て税抜
@@ -1351,6 +1394,7 @@ async function generateDoc(type) {
     total: docTotal,
     payment_method: sp.payment_method || P.payment_method || '',
     transfer_deadline: sp.transfer_deadline || '',
+    transfer_name: sp.transfer_name || '',
   };
 
   try {
