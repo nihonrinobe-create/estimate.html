@@ -841,7 +841,7 @@ function syncManualInputs() {
   if (params.get('mode') === 'invoice') {
     document.getElementById('main_view').classList.add('hidden');
     document.getElementById('done_view').classList.remove('hidden');
-    document.getElementById('done_msg').innerHTML = '📑 請求書・領収書の発行';
+    document.getElementById('done_msg').innerHTML = '📑 請求書の発行';
     document.getElementById('doc_section').style.display = 'block';
   }
 })();
@@ -1409,9 +1409,21 @@ async function generateDoc(type) {
   };
 
   try {
-    await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const result2 = await res.json();
+    if (!result2.ok) {
+      btn.disabled = false;
+      btn.textContent = '📑 請求書を発行';
+      document.getElementById('doc_result').textContent = '⚠ エラー: ' + (result2.error || '送信失敗');
+      document.getElementById('doc_result').style.color = 'red';
+      return;
+    }
   } catch(e) {
-    console.log('発行完了');
+    btn.disabled = false;
+    btn.textContent = '📑 請求書を発行';
+    document.getElementById('doc_result').textContent = '⚠ 通信エラー。再度お試しください。';
+    document.getElementById('doc_result').style.color = 'red';
+    return;
   }
 
   btn.textContent = '📑 請求書 送信済み ✅';
