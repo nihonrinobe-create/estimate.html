@@ -575,15 +575,19 @@ const REPAIR_MENU = [
 // === URLパラメータから情報取得 ===
 const params = new URLSearchParams(location.search);
 const P = {
-  contract_id: params.get('contract_id') || '',
-  case_id:     params.get('case_id') || params.get('c') || '',
-  name:        params.get('name') || '',
-  email:       params.get('email') || '',
-  tel:         params.get('tel') || '',
-  address:     params.get('address') || '',
-  initial_fee: parseInt(params.get('initial_fee')) || 9000,
-  equipment:   params.get('equipment') || '',
-  staff_id:    params.get('staff_id') || '',
+  contract_id:      params.get('contract_id') || '',
+  report_id:        params.get('report_id') || '',
+  case_id:          params.get('case_id') || params.get('c') || '',
+  name:             params.get('name') || '',
+  email:            params.get('email') || '',
+  tel:              params.get('tel') || '',
+  address:          params.get('address') || '',
+  initial_fee:      parseInt(params.get('initial_fee')) || 9000,
+  equipment:        params.get('equipment') || '',
+  staff_id:         params.get('staff_id') || '',
+  payment_method:   params.get('payment_method') || '',
+  transfer_deadline:params.get('transfer_deadline') || '',
+  transfer_name:    params.get('transfer_name') || '',
   order_items: [],
   is_repair:   false,  // ★ 修理案件フラグ
 };
@@ -1398,6 +1402,7 @@ async function generateDoc(type) {
     doc_type: type,
     case_id: P.case_id,
     contract_id: P.contract_id || '',
+    report_id: P.report_id || '',
     name: P.name,
     email: P.email,
     tel: P.tel,
