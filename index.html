@@ -792,7 +792,7 @@ function getCustomItems() {
     const name = row.querySelector('.custom-name').value.trim();
     const price = parseInt(row.querySelector('.custom-price').value) || 0;
     const qty = parseInt(row.querySelector('.custom-qty').textContent) || 1;
-    if (name && price > 0) { const taxInc = Math.round(price * (1 + TAX_RATE)); items.push({ name, price: taxInc, qty, subtotal: taxInc * qty }); }
+    if (name && price > 0) { items.push({ name, price: price, qty, subtotal: price * qty }); }  // price は入力値（税抜）
   });
   return items;
 }
@@ -1152,10 +1152,13 @@ async function doSubmit() {
   const ot = getOrderType();
   const equip = document.getElementById('c_equipment').value;
   if (ot === '原因究明作業') {
-    const diagFee = equip.includes('業務用') ? Math.round(15000 * (1 + TAX_RATE)) : Math.round(9000 * (1 + TAX_RATE));
+    const diagFee = equip.includes('業務用') ? 15000 : 9000;  // 税抜
     orderItems.push({ name: '故障診断（' + (equip || 'ルームエアコン') + '）', price: diagFee, qty: 1, subtotal: diagFee });
     getInvOptions().forEach(v => {
-      if (v.price > 0) orderItems.push({ name: v.name, price: v.price, qty: 1, subtotal: v.price });
+      if (v.price > 0) {
+        const priceEx = Math.round(v.price / (1 + TAX_RATE));  // getInvOptionsは税込返すので税抜に戻す
+        orderItems.push({ name: v.name, price: priceEx, qty: 1, subtotal: priceEx });
+      }
     });
   } else {
     document.querySelectorAll('.repair-item-row').forEach(row => {
@@ -1167,7 +1170,7 @@ async function doSubmit() {
     });
   }
   customItems.forEach(c => orderItems.push({ name: c.name, price: c.price, qty: c.qty || 1, subtotal: c.subtotal }));
-  if (couponDiscount > 0) { const cd = -Math.round(couponDiscount * (1 + TAX_RATE)); orderItems.push({ name: 'クーポン割引', price: cd, qty: 1, subtotal: cd }); }
+  if (couponDiscount > 0) { orderItems.push({ name: 'クーポン割引', price: -couponDiscount, qty: 1, subtotal: -couponDiscount }); }  // 税抜
 
   const contractId = generateContractId();
 
