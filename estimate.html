@@ -176,7 +176,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <div class="card-title">👤 報告者情報</div>
       <div class="field">
         <label>担当者番号 <span class="field-required">※必須</span></label>
-        <input type="text" id="staff_id" placeholder="例：0001" inputmode="numeric">
+        <input type="text" id="staff_id" placeholder="例：0001" inputmode="numeric" onblur="lookupStaffName()">
+        <div id="staff_name_display" style="margin-top:5px;font-size:.85rem;font-weight:600;color:#2e7d32"></div>
       </div>
       <div class="field">
         <label>訪問日</label>
@@ -1246,6 +1247,20 @@ function syncManualInputs() {
             P.initial_fee = 0;
           }
           // 診断案件（hasDiagFee=true）は P.initial_fee を保持し P.is_repair=false のまま
+        }
+
+        // ★ 担当者名を自動表示
+        if (P.staff_id) {
+          try {
+            var staffResp = await fetch(GAS_API_URL, {
+              method: 'POST', body: JSON.stringify({ form_type: 'staff_lookup', staff_id: P.staff_id })
+            });
+            var staffR = await staffResp.json();
+            if (staffR.ok) {
+              var disp = document.getElementById('staff_name_display');
+              if (disp) { disp.textContent = '担当：' + staffR.staff_name; disp.style.color = '#2e7d32'; }
+            }
+          } catch(se) {}
         }
 
         // 支払い方法を自動設定
@@ -2370,6 +2385,31 @@ async function generateDoc(type) {
     onPrefixChange();
   }, 100);
 })();
+  // === 担当者名lookup ===
+async function lookupStaffName() {
+  var sid = document.getElementById('staff_id').value.trim();
+  var display = document.getElementById('staff_name_display');
+  if (!sid) { display.textContent = ''; return; }
+  while (sid.length > 0 && sid.length < 4) sid = '0' + sid;
+  display.textContent = '検索中...';
+  display.style.color = '#999';
+  try {
+    var resp = await fetch(GAS_API_URL, {
+      method: 'POST', body: JSON.stringify({ form_type: 'staff_lookup', staff_id: sid })
+    });
+    var r = await resp.json();
+    if (r.ok) {
+      display.textContent = '担当：' + r.staff_name;
+      display.style.color = '#2e7d32';
+    } else {
+      display.textContent = '※該当なし';
+      display.style.color = '#c62828';
+    }
+  } catch(e) {
+    display.textContent = '※通信エラー';
+    display.style.color = '#c62828';
+  }
+}
 </script>
 </body>
 </html>
