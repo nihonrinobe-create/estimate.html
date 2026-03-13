@@ -1997,13 +1997,14 @@ function onStatusChange() {
       document.getElementById('diag_est_total_display').textContent = '¥' + feeInc.toLocaleString('ja-JP');
     }
 
-    // ★ パラメータなし（手入力モード）かつ完工のときだけ作業種別トグルを表示（HC-は除く）
-    const hasData = !!(P.case_id || P.name);
+    // ★ 完工のときは作業種別トグルを表示（HC-は除く）
     const casePrefix = (P.case_id || '').split('-')[0].toUpperCase();
     const isHCPrefix = casePrefix === 'HC' ||
       (document.getElementById('case_prefix') && document.getElementById('case_prefix').value === 'HC');
+    const isECPrefix = casePrefix === 'EC' ||
+      (document.getElementById('case_prefix') && document.getElementById('case_prefix').value === 'EC');
     const toggle = document.getElementById('work_type_toggle');
-    if (toggle) toggle.style.display = (isKankou && !hasData && !isHCPrefix) ? 'block' : 'none';
+    if (toggle) toggle.style.display = (isKankou && !isHCPrefix && !isECPrefix) ? 'block' : 'none';
 
     document.getElementById('notice_loss').classList.toggle('hidden', !isLoss);
     document.getElementById('notice_cancel').classList.toggle('hidden', !isCancel);
