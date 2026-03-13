@@ -821,7 +821,7 @@ function applyRepairMode() {
   P.order_items.forEach(function(item) {
     // ① REPAIR_MENU照合（修理案件のとき）
     if (P.is_repair) {
-      const idx = REPAIR_MENU.findIndex(function(m) { return m.name === item.name; });
+      const idx = REPAIR_MENU.findIndex(function(m) { return m.name === item.name || m.name.indexOf(item.name) > -1 || item.name.indexOf(m.name) > -1; });
       if (idx >= 0) {
         const qty = parseInt(item.qty) || 1;
         const span = document.getElementById('today_qty_' + idx);
@@ -1264,10 +1264,13 @@ function syncManualInputs() {
         if (r.order_type && r.order_type.indexOf('修理') > -1) {
           P.is_repair = true;
           P.initial_fee = 0;
-          var diagRadio = document.querySelector('input[name="manual_work_type"][value="修理"]');
-          if (diagRadio) diagRadio.checked = true;
+          var repairRadio = document.querySelector('input[name="manual_work_type"][value="修理"]');
+          if (repairRadio) {
+            repairRadio.checked = true;
+            document.getElementById('today_repairs_section').style.display = '';
+          }
         }
-
+        
         // ★ 担当者名を自動表示
         if (P.staff_id) {
           try {
