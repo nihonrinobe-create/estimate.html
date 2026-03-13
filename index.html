@@ -1019,9 +1019,14 @@ function nextStep() {
     const oType = getOrderType();
     const pay = getPaymentMethod();
     let extra = '';
-    if (oType === '修理') {
+     if (oType === '修理') {
       const names = getSelectedRepairNames();
-      if (names) extra = '<br><span style="font-size:.85rem;color:#666">└ ' + names + '</span>';
+      const inv = getInvOptions();
+      const invNames = inv.filter(v => v.price > 0).map(v => v.name + '(¥' + v.price.toLocaleString() + '税抜)');
+      const allNames = [];
+      if (names) allNames.push(names);
+      if (invNames.length) allNames.push(invNames.join('、'));
+      if (allNames.length) extra = '<br><span style="font-size:.85rem;color:#666">└ ' + allNames.join('、') + '</span>';
     }
     if (oType === '原因究明作業') {
       const inv = getInvOptions();
@@ -1094,7 +1099,21 @@ function nextStep() {
         }
       });
     }
-
+    
+ // 追加条件（修理モードでも表示）
+    if (orderType !== '原因究明作業') {
+      const inv2 = getInvOptions();
+      inv2.forEach(v => {
+        if (v.price > 0) {
+          subtotalEx += v.price;
+          estRows += '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + v.name + '</td>'
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + v.price.toLocaleString() + '円</td>'
+            + '<td style="padding:8px;text-align:center;border-bottom:1px solid #ddd">1</td>'
+            + '<td style="padding:8px;text-align:right;border-bottom:1px solid #ddd">' + v.price.toLocaleString() + '円</td></tr>';
+        }
+      });
+    }
+    
     getCustomItems().forEach(item => {
       // getCustomItems()は税抜を返す
       const subEx = item.price * item.qty;
@@ -1176,6 +1195,12 @@ async function doSubmit() {
       if (cnt > 0) {
         const price = parseInt(row.dataset.price);
         orderItems.push({ name: row.dataset.name, price: price, qty: cnt, subtotal: price * cnt });
+      }
+    });
+    // 追加条件（修理モードでも送信）
+    getInvOptions().forEach(v => {
+      if (v.price > 0) {
+        orderItems.push({ name: v.name, price: v.price, qty: 1, subtotal: v.price });
       }
     });
   }
