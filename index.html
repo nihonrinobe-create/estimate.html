@@ -638,7 +638,10 @@ window.onload = async function() {
         if (r.address)  document.getElementById('c_address').value = r.address;
         if (r.banchi)   document.getElementById('c_banchi').value = r.banchi;
         if (r.building) document.getElementById('c_building').value = r.building;
-        if (r.staff_id) document.getElementById('c_emp_id').value = r.staff_id;
+        if (r.staff_id) {
+          document.getElementById('c_emp_id').value = r.staff_id;
+          lookupStaffName();
+        }
         if (r.transfer_name) {
           document.getElementById('transfer_name').value = r.transfer_name;
         }
