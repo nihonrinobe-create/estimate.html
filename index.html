@@ -889,6 +889,20 @@ function validateStep(step) {
     const prefix = document.getElementById('c_case_prefix').value;
     // HC-は症状不要
     if (prefix !== 'HC' && getSymptoms().length === 0) { setFieldError('f_symptom','症状を1つ以上選択してください'); ok=false; }
+    // 修理モードで項目0件チェック
+    const _ot = getOrderType();
+    if (_ot === '修理' || (prefix === 'HC' && _ot === '清掃作業')) {
+      let hasItems = false;
+      document.querySelectorAll('.repair-item-row').forEach(row => {
+        if (parseInt(row.querySelector('.count-num').textContent) > 0) hasItems = true;
+      });
+      if (!hasItems) getInvOptions().forEach(v => { if (v.price > 0) hasItems = true; });
+      if (!hasItems) getCustomItems().forEach(c => { hasItems = true; });
+      if (!hasItems) {
+        alert('修理メニュー・追加条件・追加項目のいずれかを1つ以上入力してください');
+        ok = false;
+      }
+    }
   }
   if (step === 3) {
     if (getPaymentMethod() === '銀行振り込み') {
