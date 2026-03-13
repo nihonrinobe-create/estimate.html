@@ -729,6 +729,17 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         <p style="font-size:.85rem;color:var(--text-sub);margin-bottom:10px">
           見積りが承認されたら、ここから請求書を発行できます。
         </p>
+        <div style="background:#e3f2fd;border:2px solid var(--blue);border-radius:10px;padding:14px;margin:10px 0">
+          <div style="font-weight:700;color:var(--blue);margin-bottom:10px">💳 お支払い情報（銀行振り込み）</div>
+          <div class="field">
+            <label>振込期限 <span class="field-required">※必須</span></label>
+            <input type="date" id="inv_transfer_deadline" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem">
+          </div>
+          <div class="field">
+            <label>振込名義 <span class="field-required">※必須</span></label>
+            <input type="text" id="inv_transfer_name" placeholder="例：ヤマダ タロウ" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;box-sizing:border-box">
+          </div>
+        </div>
         <div style="text-align:center;margin-top:10px">
           <button class="doc-btn" id="btn_invoice" onclick="generateDoc('invoice')" style="width:60%;max-width:280px">
             📑 請求書を発行
@@ -1288,11 +1299,25 @@ function syncManualInputs() {
   initUI();
 
   // mode=invoice : 業務報告フォームを隠して請求書発行ボタンだけ表示
-  if (params.get('mode') === 'invoice') {
+ if (params.get('mode') === 'invoice') {
     document.getElementById('main_view').classList.add('hidden');
     document.getElementById('done_view').classList.remove('hidden');
     document.getElementById('done_msg').innerHTML = '📑 請求書の発行';
     document.getElementById('doc_section').style.display = 'block';
+    // ★ 振込期限・振込名義の初期値
+    var invDLmode = document.getElementById('inv_transfer_deadline');
+    if (invDLmode && !invDLmode.value) {
+      if (P.transfer_deadline) {
+        invDLmode.value = P.transfer_deadline;
+      } else {
+        var d14m = new Date(); d14m.setDate(d14m.getDate() + 14);
+        invDLmode.value = d14m.toISOString().split('T')[0];
+      }
+    }
+    var invNMmode = document.getElementById('inv_transfer_name');
+    if (invNMmode && !invNMmode.value && P.transfer_name) {
+      invNMmode.value = P.transfer_name;
+    }
   }
 })();
 
@@ -2279,12 +2304,40 @@ async function submitReport() {
   const showDocSection = hasEstimate || isKankou || isDiagEst;
   document.getElementById('doc_section').style.display = showDocSection ? 'block' : 'none';
 
+  // ★ 請求書発行用：振込期限・振込名義の初期値をセット
+  var invDeadlineEl = document.getElementById('inv_transfer_deadline');
+  if (invDeadlineEl && !invDeadlineEl.value) {
+    var d14inv = new Date(); d14inv.setDate(d14inv.getDate() + 14);
+    invDeadlineEl.value = d14inv.toISOString().split('T')[0];
+  }
+  var invNameEl = document.getElementById('inv_transfer_name');
+  if (invNameEl && !invNameEl.value && P.transfer_name) {
+    invNameEl.value = P.transfer_name;
+  }
+
   window._submittedPayload = payload;
 }
 
 // === 書類発行（請求書・領収書） ===
 async function generateDoc(type) {
   const btn = document.getElementById('btn_' + type);
+
+  // ★ 請求書：振込期限・振込名義バリデーション
+  if (type === 'invoice') {
+    var invDL = document.getElementById('inv_transfer_deadline');
+    var invNM = document.getElementById('inv_transfer_name');
+    if (invDL && !invDL.value) {
+      alert('振込期限を入力してください');
+      invDL.focus();
+      return;
+    }
+    if (invNM && !invNM.value.trim()) {
+      alert('振込名義を入力してください');
+      invNM.focus();
+      return;
+    }
+  }
+
   btn.textContent = '発行中...';
   btn.disabled = true;
 
@@ -2342,9 +2395,14 @@ async function generateDoc(type) {
     tel: P.tel,
     items: docItems,
     total: docTotal,
-    payment_method: sp.payment_method || P.payment_method || '',
-    transfer_deadline: sp.transfer_deadline || P.transfer_deadline || '',
-    transfer_name: sp.transfer_name || P.transfer_name || '',
+    staff_id: P.staff_id || sp.staff_id || '',
+    payment_method: (type === 'invoice') ? '銀行振り込み' : (sp.payment_method || P.payment_method || ''),
+    transfer_deadline: (type === 'invoice' && document.getElementById('inv_transfer_deadline'))
+      ? document.getElementById('inv_transfer_deadline').value
+      : (sp.transfer_deadline || P.transfer_deadline || ''),
+    transfer_name: (type === 'invoice' && document.getElementById('inv_transfer_name'))
+      ? document.getElementById('inv_transfer_name').value.trim()
+      : (sp.transfer_name || P.transfer_name || ''),
   };
 
   try {
