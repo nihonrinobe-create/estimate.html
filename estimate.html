@@ -2173,6 +2173,17 @@ async function submitReport() {
     });
   }
 
+  // ★ 完工＋修理モード: 追加作業が0件（クーポン行のみ）ならエラー
+  if (isKankou && P.is_repair) {
+    var realTodayItems = todayItems.filter(function(it) { return !it.name.startsWith('クーポン'); });
+    if (realTodayItems.length === 0) {
+      alert('追加作業を1つ以上入力してください');
+      btn.disabled = false;
+      btn.textContent = '完了報告を送信';
+      return;
+    }
+  }
+
   let hasEstimate = false;
   let estItems = [];
   let estTotal = 0;
@@ -2197,6 +2208,14 @@ async function submitReport() {
     estTotal = Math.max(0, estTotal);
     estExpiry = document.getElementById('est_expiry').value;
     estNote = document.getElementById('est_note').value;
+    // ★ 後日見積の項目が0件（クーポン行のみ）ならエラー
+    var realEstItemsChk = estItems.filter(function(it) { return !it.name.startsWith('クーポン'); });
+    if (realEstItemsChk.length === 0) {
+      alert('後日見積りの項目を1つ以上入力してください');
+      btn.disabled = false;
+      btn.textContent = '完了報告を送信';
+      return;
+    }
   } else if (isReserveEst) {
     hasEstimate = true;
     estItems = getSelectedItems('resest');
@@ -2218,6 +2237,14 @@ async function submitReport() {
     estTotal = Math.max(0, estTotal);
     estExpiry = document.getElementById('res_est_expiry').value;
     estNote = document.getElementById('res_est_note').value;
+    // ★ 見積項目が0件（クーポン行のみ）ならエラー
+    var realEstItems = estItems.filter(function(it) { return !it.name.startsWith('クーポン'); });
+    if (realEstItems.length === 0) {
+      alert('見積り項目を1つ以上入力してください');
+      btn.disabled = false;
+      btn.textContent = '予約＋見積書を送信';
+      return;
+    }
   }
 
   // ★ 修理案件の場合、diag_fee は 0 で送信
