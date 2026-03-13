@@ -2343,33 +2343,24 @@ async function generateDoc(type) {
 
   const sp = window._submittedPayload || {};
 
-  let docItems = [];
+let docItems = [];
 
-  if (P.order_items && P.order_items.length > 0) {
-    docItems = P.order_items.map(r => ({
-      name: r.name, price: r.price, qty: r.qty, subtotal: r.subtotal || r.price * r.qty
-    }));
-    (sp.today_repairs || []).forEach(r => {
-      const exists = docItems.some(d => d.name === r.name);
-      if (!exists) {
-        docItems.push({ name: r.name, price: r.price, qty: r.qty, subtotal: r.subtotal || r.price * r.qty });
-      }
-    });
-  } else {
-    if (sp.diag_fee) {
-      const diagName = '故障診断' + (P.equipment ? '（' + P.equipment + '）' : '');
-      docItems.push({ name: diagName, price: sp.diag_fee, qty: 1, subtotal: sp.diag_fee });
-    }
-    (sp.today_repairs || []).forEach(r => {
-      docItems.push({ name: r.name, price: r.price, qty: r.qty, subtotal: r.subtotal || r.price * r.qty });
-    });
-  }
-
+  // ★ 見積りがある場合は見積り内容を優先
   if (sp.has_estimate && sp.estimate_repairs && sp.estimate_repairs.length > 0) {
     docItems = sp.estimate_repairs.map(r => ({
       name: r.name, price: r.price, qty: r.qty, subtotal: r.subtotal || r.price * r.qty
     }));
+  } else if (sp.today_repairs && sp.today_repairs.length > 0) {
+    // 完工の今日の作業内容
+    if (sp.diag_fee) {
+      const diagName = '故障診断' + (P.equipment ? '（' + P.equipment + '）' : '');
+      docItems.push({ name: diagName, price: sp.diag_fee, qty: 1, subtotal: sp.diag_fee });
+    }
+    sp.today_repairs.forEach(r => {
+      docItems.push({ name: r.name, price: r.price, qty: r.qty, subtotal: r.subtotal || r.price * r.qty });
+    });
   }
+  // ★ spにデータがない場合（mode=invoiceなど）はdocItems空のまま → GAS側で復元
 
   let docTotal = 0;
   if (sp.has_estimate) {
