@@ -721,7 +721,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="complete-msg" id="done_msg">
       ✅ 報告を送信しました
     </div>
-
+    
+<!-- 見積書編集リンク -->
+<div class="card" style="margin-top:10px">
+  <div style="text-align:center">
+    <div style="font-size:.85rem;color:var(--text-sub);margin-bottom:8px">▼ 見積書を編集・再発行する</div>
+    <a id="link_quote_edit" href="#" style="display:inline-block;padding:12px 24px;background:#f3e5f5;color:#5c2d91;border:2px solid #5c2d91;border-radius:10px;text-decoration:none;font-weight:700;font-size:.95rem">📄 見積書編集ページを開く</a>
+  </div>
+</div>
+    
     <!-- 後日ドキュメント発行 -->
     <div class="doc-section" id="doc_section">
       <div class="section-title">📄 書類発行（後日用）</div>
@@ -2355,6 +2363,12 @@ async function submitReport() {
   if (invNameEl && !invNameEl.value && P.transfer_name) {
     invNameEl.value = P.transfer_name;
   }
+
+  // 見積書編集リンクをセット
+var linkQuote = document.getElementById('link_quote_edit');
+if (linkQuote && P.case_id) {
+  linkQuote.href = 'https://nihonrinobe-create.github.io/quote.html?c=' + encodeURIComponent(P.case_id);
+}
 
   window._submittedPayload = payload;
 }
