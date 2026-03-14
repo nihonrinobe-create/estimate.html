@@ -112,13 +112,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="card">
       <div class="card-title">📝 発行する書類の種別</div>
       <div class="type-grid" id="doc_type_grid">
-        <label class="type-label"><input type="radio" name="q_doc_type" value="見積書" checked onchange="updateVerInfo()">📄 見積書</label>
-        <label class="type-label" id="opt_diag_type"><input type="radio" name="q_doc_type" value="診断見積書" onchange="updateVerInfo()">📋 診断見積書</label>
+        <label class="type-label" id="opt_diag_type"><input type="radio" name="q_doc_type" value="診断見積書" onchange="onDocTypeChange()">📋 診断見積書</label>
+        <label class="type-label"><input type="radio" name="q_doc_type" value="見積書" checked onchange="onDocTypeChange()">🔧 修理見積書</label>
       </div>
-    </div>
-    <div id="repair_menu_section">
-      <div class="section-title">🔧 修理メニュー</div>
-      <div class="card" id="q_repair_menu"></div>
     </div>
     <div id="add_cond_section">
       <div class="section-title">📋 追加条件</div>
@@ -131,6 +127,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           <div class="q-cond-row" data-cond-name="電気系統調査" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px"><span style="font-size:.9rem;font-weight:600;flex:1">電気系統調査</span><input type="number" class="q-cond-price" placeholder="金額（税抜）" inputmode="numeric" style="width:130px;padding:8px;border:2px solid var(--border);border-radius:8px;font-size:.95rem;text-align:right" oninput="qRecalc()"></div>
         </div>
       </div>
+    </div>
+    <div id="repair_menu_section">
+      <div class="section-title">🔧 修理メニュー</div>
+      <div class="card" id="q_repair_menu"></div>
     </div>
     <div id="custom_section">
       <div class="section-title">✏️ 追加項目（自由入力）</div>
@@ -243,7 +243,7 @@ function renderMain(){
   if(isHC)document.getElementById('opt_diag_type').style.display='none';
   buildQRepairMenu();buildVerSelect();
   var d30=new Date();d30.setDate(d30.getDate()+30);document.getElementById('q_expiry').value=d30.toISOString().split('T')[0];
-  if(Q.versions.length>0)onVersionChange();else{updateVerInfo();qRecalc();}
+  if(Q.versions.length>0)onVersionChange();else{onDocTypeChange();}
 }
 
 function buildQRepairMenu(){
@@ -261,8 +261,9 @@ function buildVerSelect(){
   sel.innerHTML='';
   sorted.forEach(function(v){
     var isL=(v.doc_type==='見積書'&&v.ver===Q.estimate_versions)||(v.doc_type==='診断見積書'&&v.ver===Q.diag_estimate_versions);
+    var dtDisp=v.doc_type==='見積書'?'修理見積書':v.doc_type;
     var o=document.createElement('option');o.value=Q.versions.indexOf(v);
-    o.textContent=v.doc_type+' 第'+v.ver+'版'+(isL?'（最新）':'')+' - '+v.created;sel.appendChild(o);
+    o.textContent=dtDisp+' 第'+v.ver+'版'+(isL?'（最新）':'')+' - '+v.created;sel.appendChild(o);
   });
 }
 
@@ -270,7 +271,10 @@ function onVersionChange(){
   var sel=document.getElementById('q_base_ver');if(!sel.options.length)return;
   var v=Q.versions[parseInt(sel.value)];if(!v)return;
   resetInputs();
-  document.querySelector('input[name="q_doc_type"][value="見積書"]').checked=true;
+  // ベースの種別に応じてラジオを設定（デフォルト：修理見積書）
+  var baseType=v.doc_type==='診断見積書'?'見積書':'見積書';
+  document.querySelector('input[name="q_doc_type"][value="'+baseType+'"]').checked=true;
+  onDocTypeChange();
   if(v.staff_id){var s=String(v.staff_id);while(s.length<4)s='0'+s;document.getElementById('q_staff_id').value=s;lookupStaff();}
   if(v.expiry)document.getElementById('q_expiry').value=v.expiry;
   if(v.note)document.getElementById('q_note').value=v.note;
@@ -301,10 +305,21 @@ function restoreItems(items){
   });
 }
 
+function onDocTypeChange(){
+  var dt=(document.querySelector('input[name="q_doc_type"]:checked')||{}).value||'見積書';
+  var isDiag=(dt==='診断見積書');
+  // 診断見積書のときは修理メニューを非表示
+  document.getElementById('repair_menu_section').style.display=isDiag?'none':'';
+  // EC/HCの場合はrenderMainで既に非表示なのでそちらが優先
+  var isEC=Q.prefix==='EC',isHC=Q.prefix==='HC';
+  if(isEC||isHC)document.getElementById('repair_menu_section').style.display='none';
+  updateVerInfo();qRecalc();
+}
 function updateVerInfo(){
   var dt=(document.querySelector('input[name="q_doc_type"]:checked')||{}).value||'見積書';
+  var dtLabel=dt==='見積書'?'修理見積書':dt;
   var c=dt==='見積書'?Q.estimate_versions:Q.diag_estimate_versions,nx=c+1;
-  document.getElementById('q_ver_info').textContent=c===0?dt+' 新規作成 → 第1版として発行されます':dt+' 現在: 第'+c+'版 → 発行すると第'+nx+'版になります';
+  document.getElementById('q_ver_info').textContent=c===0?dtLabel+' 新規作成 → 第1版として発行されます':dtLabel+' 現在: 第'+c+'版 → 発行すると第'+nx+'版になります';
 }
 
 function addQCustom(){
