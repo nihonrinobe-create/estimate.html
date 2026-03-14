@@ -1325,6 +1325,11 @@ function syncManualInputs() {
     document.getElementById('done_view').classList.remove('hidden');
     document.getElementById('done_msg').innerHTML = '📑 請求書の発行';
     document.getElementById('doc_section').style.display = 'block';
+   // 見積書編集リンクをセット（mode=invoice時）
+    var linkQuoteInv = document.getElementById('link_quote_edit');
+    if (linkQuoteInv && P.case_id) {
+      linkQuoteInv.href = 'https://nihonrinobe-create.github.io/quote.html?c=' + encodeURIComponent(P.case_id);
+    }
     // ★ 振込期限・振込名義の初期値
     var invDLmode = document.getElementById('inv_transfer_deadline');
     if (invDLmode && !invDLmode.value) {
