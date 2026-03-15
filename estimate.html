@@ -2475,8 +2475,10 @@ let docItems = [];
     transfer_name: (type === 'invoice' && document.getElementById('inv_transfer_name'))
       ? document.getElementById('inv_transfer_name').value.trim()
       : (sp.transfer_name || P.transfer_name || ''),
+    quote_ver: params.get('quote_ver') || '',
+    quote_type: params.get('quote_type') || '',
   };
-
+  
   try {
     const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) });
     const result2 = await res.json();
